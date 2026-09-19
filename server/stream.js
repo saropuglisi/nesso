@@ -1,4 +1,4 @@
-import { AppError, requireThat } from "./domain.js";
+import { AppError, requireThat, validateFocus } from "./domain.js";
 
 // Emit only complete JSON objects in the top-level nodes and edges arrays.
 // Strings (including escaped quotes/braces) never affect nesting.
@@ -37,15 +37,26 @@ export function graphIncremental(onItem) {
           char: c,
           start: offset,
           key,
-          item: c === "{" ? parent?.key : undefined,
+          item:
+            c === "{"
+              ? stack.length === 1 &&
+                /"focus"\s*:\s*$/.test(source.slice(0, offset))
+                ? "focus"
+                : parent?.key
+              : undefined,
         });
       } else if (c === "}" || c === "]") {
         const entry = stack.pop();
         if (entry?.item) {
           try {
+            const value = JSON.parse(source.slice(entry.start, offset + 1));
             onItem(
-              entry.item === "nodes" ? "node" : "edge",
-              JSON.parse(source.slice(entry.start, offset + 1)),
+              entry.item === "focus"
+                ? "focus"
+                : entry.item === "nodes"
+                  ? "node"
+                  : "edge",
+              entry.item === "focus" ? validateFocus(value) : value,
             );
           } catch (e) {
             if (e instanceof SyntaxError)

@@ -7,6 +7,21 @@ import { createApp } from "../server/index.js";
 import { openStore } from "../server/store.js";
 import { graph, input } from "./fixtures.js";
 
+test("decisive point arrives before graph nodes and rejects incomplete focus", () => {
+  const events = [];
+  const append = graphIncremental((type, data) => events.push({ type, data }));
+  const prefix = JSON.stringify({ focus: graph().focus }).slice(0, -1);
+  for (const char of prefix) append(char);
+  assert.deepEqual(events, [{ type: "focus", data: graph().focus }]);
+  append(',"nodes":[' + JSON.stringify(graph().nodes[0]) + "]}");
+  assert.equal(events[1].type, "node");
+  assert.throws(
+    () =>
+      graphIncremental(() => {})(JSON.stringify({ focus: { claim: "test" } })),
+    /Punto decisivo/,
+  );
+});
+
 test("incremental graph emits complete objects once, respecting escaped strings and chunk splits", () => {
   const g = graph();
   g.nodes[0].label = 'Test { [ \\"nodes\\": [ ] } è';
@@ -56,7 +71,7 @@ test("OpenRouter emits nodes before completion, preserves UTF-8 and validates te
     wire.enqueue(new Uint8Array([byte]));
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(
-    items.length,
+    items.filter((x) => x.type === "node").length,
     1,
     "a node must arrive while provider connection remains open",
   );

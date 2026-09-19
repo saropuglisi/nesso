@@ -16,6 +16,14 @@ export function graph() {
     evidenceNeeded: ["Retention del gruppo di confronto, stesso periodo."],
   });
   return {
+    focus: {
+      claim:
+        "La settimana breve deve ridurre le dimissioni senza concentrare un carico insostenibile.",
+      why: "Il tempo libero aggiuntivo non garantisce da solo che le persone restino.",
+      assumption:
+        "Il carico resta sostenibile anche con meno giorni di lavoro.",
+      test: "Confrontare retention e carico di lavoro con un gruppo simile nello stesso periodo; nessun miglioramento indebolirebbe il nesso.",
+    },
     title: "Settimana breve e retention",
     summary: "Un’ipotesi da verificare con un gruppo di confronto.",
     interpretation: {

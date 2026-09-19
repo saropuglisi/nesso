@@ -8,6 +8,8 @@ Streaming: OpenRouter/API compatibili via SSE, OpenAI Responses via eventi SSE, 
 
 ## Avvio
 
+La generazione ora richiede per primo un **passaggio decisivo**: nesso specifico, motivazione, assunzione necessaria e verifica discriminante. Questo oggetto viene validato e trasmesso prima dei nodi quando il provider rispetta l’ordine richiesto. È visibile sul canvas e apribile durante la generazione. È una priorità di ricerca proposta dal modello, non un fatto verificato. Non sono ancora implementati ricerca delle fonti e revisione critica separata; la qualità semantica va valutata sui casi dello studio. Le analisi precedenti senza questo campo restano leggibili.
+
 Richiede Node.js >= 22.13 (verificato con 25.6). Nessuna dipendenza npm esterna. SQLite è quello incluso in Node; alcune versioni mostrano un avviso sperimentale.
 
 1. Crea `.env` usando `.env.example` e configura provider, modello e chiave. Non inserire la chiave nel browser, in chat o nel repository.

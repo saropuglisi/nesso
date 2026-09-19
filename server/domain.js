@@ -62,6 +62,12 @@ const object = (properties) => ({
   additionalProperties: false,
 });
 export const GRAPH_SCHEMA = object({
+  focus: object({
+    claim: str,
+    why: str,
+    assumption: str,
+    test: str,
+  }),
   title: str,
   summary: str,
   interpretation: object({
@@ -97,6 +103,19 @@ export const GRAPH_SCHEMA = object({
     marketVsThesis: str,
   }),
 });
+export function validateFocus(value) {
+  requireThat(
+    value && typeof value === "object" && !Array.isArray(value),
+    "Punto decisivo mancante.",
+    422,
+  );
+  return Object.fromEntries(
+    ["claim", "why", "assumption", "test"].map((key) => [
+      key,
+      text(value[key], "Punto decisivo: " + key, 800),
+    ]),
+  );
+}
 export function validateGraph(g, effort) {
   requireThat(
     g && typeof g === "object",
@@ -105,6 +124,7 @@ export function validateGraph(g, effort) {
   );
   text(g.title, "Titolo", 500);
   text(g.summary, "Sintesi", 4000);
+  const focus = validateFocus(g.focus);
   requireThat(
     Array.isArray(g.nodes) &&
       g.nodes.length >= 3 &&
@@ -234,6 +254,7 @@ export function validateGraph(g, effort) {
       422,
     );
   return {
+    focus,
     title: g.title,
     summary: g.summary,
     interpretation: {

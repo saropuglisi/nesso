@@ -151,15 +151,30 @@ async function startLiveAnalysis(input) {
   }, configuration.timeoutMs || 240000);
   const progressClock = setInterval(() => {
     const seconds = Math.floor((Date.now() - started) / 1000);
-    const waiting = nodes.size === 0 && seconds >= 30
-      ? "Il modello non ha ancora inviato caselle. Puoi interrompere e riprovare con effort basso."
-      : liveMessage;
+    const waiting =
+      nodes.size === 0 && !analysis.body.graph.focus && seconds >= 30
+        ? "Il modello non ha ancora inviato caselle. Puoi interrompere e riprovare con effort basso."
+        : liveMessage;
     $("#liveMessage").textContent = `${seconds}s · ${waiting}`;
   }, 1000);
   const nodes = new Map(),
     edges = [];
   function event(frame) {
     if (frame.type === "error") throw new Error(frame.data.message);
+    if (frame.type === "focus") {
+      const f = frame.data;
+      if (
+        !f ||
+        !["claim", "why", "assumption", "test"].every(
+          (k) => typeof f[k] === "string" && f[k].trim() && f[k].length <= 800,
+        )
+      )
+        return;
+      analysis.body.graph.focus = f;
+      liveMessage = "Passaggio decisivo individuato · costruisco i nessi…";
+      render();
+      return;
+    }
     if (frame.type === "complete") {
       analysis = frame.data;
       complete = true;
@@ -250,8 +265,8 @@ async function startLiveAnalysis(input) {
     liveMessage = timedOut
       ? "Tempo limite raggiunto. La bozza non è stata salvata: riprova con effort basso o un modello più rapido."
       : controller.signal.aborted
-      ? "Analisi interrotta · bozza non salvata"
-      : e.message;
+        ? "Analisi interrotta · bozza non salvata"
+        : e.message;
     $("#stopAnalysis").hidden = true;
     $("#retryAnalysis").hidden = false;
     render();
@@ -266,6 +281,10 @@ async function startLiveAnalysis(input) {
 function render() {
   if (!analysis) return;
   const g = analysis.body.graph;
+  $("#focusSummary").hidden = !g.focus;
+  $("#focusClaim").textContent = g.focus?.claim || "";
+  $("#focusSummary").onclick = inspectFocus;
+  $("#canvas").classList.toggle("has-focus", Boolean(g.focus));
   $("#empty").hidden = true;
   $("#titleLabel").textContent = g.title;
   $("#effortLabel").textContent =
@@ -346,6 +365,18 @@ function render() {
   }
   for (const el of existing.values()) el.remove();
   transform();
+}
+function inspectFocus() {
+  const f = analysis?.body.graph.focus;
+  if (!f) return;
+  selected = null;
+  render();
+  $("#inspector").hidden = false;
+  $("#inspector").innerHTML =
+    `<button class="close" id="closeFocus" aria-label="Chiudi dettaglio">×</button><span class="badge">Priorità di ricerca · non un verdetto</span><h3>${escape(f.claim)}</h3><h4>Perché questo passaggio</h4><p>${escape(f.why)}</p><h4>Che cosa stai assumendo</h4><p>${escape(f.assumption)}</p><h4>La verifica che conta</h4><p>${escape(f.test)}</p><p class="muted">Questo punto è proposto dal modello. Le evidenze devono ancora essere raccolte.</p>`;
+  $("#closeFocus").onclick = () => {
+    $("#inspector").hidden = true;
+  };
 }
 function inspect(id) {
   selected = id;

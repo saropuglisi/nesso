@@ -142,7 +142,11 @@ export function createApp({
             emit("error", {
               message:
                 e instanceof AppError
-                  ? e.message
+                  ? e.status === 422
+                    ? "Il modello ha prodotto una mappa non valida: " +
+                      e.message +
+                      " La bozza non è salvata; questo non è un giudizio sulla tua tesi."
+                    : e.message
                   : "Generazione interrotta. La mappa parziale non è stata salvata.",
             });
             res.end();
