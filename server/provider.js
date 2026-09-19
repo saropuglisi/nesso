@@ -52,6 +52,7 @@ export function publicConfig(c) {
     endpoint: c.base,
     keyConfigured: Boolean(c.key),
     ready: Boolean(c.model && (c.local || c.key)),
+    timeoutMs: c.timeout,
     effort: EFFORT,
   };
 }

@@ -143,6 +143,19 @@ async function startLiveAnalysis(input) {
   $("#newButton").disabled = $("#journalButton").disabled = true;
   render();
   let complete = false;
+  const started = Date.now();
+  let timedOut = false;
+  const deadline = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, configuration.timeoutMs || 240000);
+  const progressClock = setInterval(() => {
+    const seconds = Math.floor((Date.now() - started) / 1000);
+    const waiting = nodes.size === 0 && seconds >= 30
+      ? "Il modello non ha ancora inviato caselle. Puoi interrompere e riprovare con effort basso."
+      : liveMessage;
+    $("#liveMessage").textContent = `${seconds}s · ${waiting}`;
+  }, 1000);
   const nodes = new Map(),
     edges = [];
   function event(frame) {
@@ -234,13 +247,17 @@ async function startLiveAnalysis(input) {
       "Mappa completata. Puoi esplorare le assunzioni e fissare i criteri.",
     );
   } catch (e) {
-    liveMessage = controller.signal.aborted
+    liveMessage = timedOut
+      ? "Tempo limite raggiunto. La bozza non è stata salvata: riprova con effort basso o un modello più rapido."
+      : controller.signal.aborted
       ? "Analisi interrotta · bozza non salvata"
       : e.message;
     $("#stopAnalysis").hidden = true;
     $("#retryAnalysis").hidden = false;
     render();
   } finally {
+    clearTimeout(deadline);
+    clearInterval(progressClock);
     liveController = null;
     $("#newButton").disabled = $("#journalButton").disabled = false;
     render();
