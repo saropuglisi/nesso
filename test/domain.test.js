@@ -8,6 +8,25 @@ import {
 } from "../server/domain.js";
 import { graph, input, criterion } from "./fixtures.js";
 
+test("text-only input leaves missing horizon unset and preserves derived interpretation", () => {
+  const request = inputSpec({ thesis: input.thesis, effort: "low" });
+  assert.equal(request.domain, null);
+  assert.equal(request.deadline, null);
+  const raw = graph();
+  raw.interpretation = {
+    domain: "general",
+    deadline: null,
+    horizon: "",
+    context: "",
+    missing: ["Entro quando?"],
+  };
+  const result = validateGraph(raw, "low");
+  assert.equal(result.interpretation.deadline, null);
+  assert.deepEqual(result.interpretation.missing, ["Entro quando?"]);
+  raw.interpretation.deadline = "2027-02-30";
+  assert.throws(() => validateGraph(raw, "low"), /data/);
+});
+
 test("generic graph preserves arbitrary IDs and marks all generated nodes unverified", () => {
   const result = validateGraph(graph(), "low");
   assert.equal(result.nodes[1].id, "retention");

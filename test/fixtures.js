@@ -18,6 +18,13 @@ export function graph() {
   return {
     title: "Settimana breve e retention",
     summary: "Un’ipotesi da verificare con un gruppo di confronto.",
+    interpretation: {
+      domain: "general",
+      deadline: "2099-12-31",
+      horizon: "Entro il 2099",
+      context: "",
+      missing: [],
+    },
     nodes: [
       n("root", "thesis", "Settimana breve"),
       n("retention", "consequence", "Migliore retention"),

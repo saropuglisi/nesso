@@ -131,7 +131,16 @@ export function createApp({
           );
           const criteria = validateCriteria(body.criteria);
           requireThat(
-            criteria.every((c) => c.due <= analysis.body.input.deadline),
+            !(
+              analysis.body.graph.interpretation?.deadline ||
+              analysis.body.input.deadline
+            ) ||
+              criteria.every(
+                (c) =>
+                  c.due <=
+                  (analysis.body.graph.interpretation?.deadline ||
+                    analysis.body.input.deadline),
+              ),
             "La data dei criteri non può superare l’orizzonte della tesi. Rivedi la tesi prima di fissarla.",
           );
           const existing = store

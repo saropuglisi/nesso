@@ -321,6 +321,47 @@ dialog::backdrop {
   background: #25392d40;
   backdrop-filter: blur(3px);
 }
+dialog.composer {
+  width: 540px;
+  padding: 22px;
+  border-radius: 26px;
+}
+.composer-title {
+  display: block;
+  font:
+    24px Georgia,
+    serif;
+  padding-right: 28px;
+  margin-bottom: 16px;
+}
+.composer textarea {
+  min-height: 100px;
+  max-height: 35vh;
+  border: 0;
+  background: #f7f9f7;
+  border-radius: 16px;
+}
+.composer-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+.composer-controls label {
+  font-size: 13px;
+  color: #64786c;
+}
+.composer-controls select {
+  width: auto;
+  padding: 8px;
+  border-radius: 20px;
+}
+.composer-controls button {
+  margin-left: auto;
+}
+.composer .error:empty {
+  display: none;
+}
 dialog p {
   font-size: 14px;
 }

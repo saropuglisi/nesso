@@ -41,14 +41,15 @@ export function inputSpec(raw) {
   );
   requireThat(Object.hasOwn(EFFORT, raw.effort), "Effort non valido.");
   requireThat(
-    ["general", "trading"].includes(raw.domain),
+    raw.domain === undefined || ["general", "trading"].includes(raw.domain),
     "Ambito non valido.",
   );
   return {
     thesis,
     effort: raw.effort,
-    domain: raw.domain,
-    deadline: date(raw.deadline, "Scadenza"),
+    domain: raw.domain ?? null,
+    deadline: raw.deadline ? date(raw.deadline, "Scadenza") : null,
+    referenceDate: new Date().toISOString().slice(0, 10),
     context: typeof raw.context === "string" ? raw.context.slice(0, 12000) : "",
   };
 }
@@ -63,6 +64,13 @@ const object = (properties) => ({
 export const GRAPH_SCHEMA = object({
   title: str,
   summary: str,
+  interpretation: object({
+    domain: { type: "string", enum: ["general", "trading"] },
+    deadline: { type: ["string", "null"] },
+    horizon: str,
+    context: str,
+    missing: strings,
+  }),
   nodes: {
     type: "array",
     items: object({
@@ -196,6 +204,22 @@ export function validateGraph(g, effort) {
     422,
   );
   checkStrings(g.uncertainties, "Incertezze");
+  const interpretation = g.interpretation;
+  requireThat(
+    interpretation && ["general", "trading"].includes(interpretation.domain),
+    "Interpretazione della tesi mancante.",
+    422,
+  );
+  if (interpretation.deadline !== null)
+    date(interpretation.deadline, "Orizzonte ricavato");
+  for (const key of ["horizon", "context"])
+    requireThat(
+      typeof interpretation[key] === "string" &&
+        interpretation[key].length <= 4000,
+      "Interpretazione non valida.",
+      422,
+    );
+  checkStrings(interpretation.missing, "Informazioni da chiarire");
   requireThat(
     g.trading && typeof g.trading === "object",
     "Contesto trading mancante.",
@@ -212,6 +236,13 @@ export function validateGraph(g, effort) {
   return {
     title: g.title,
     summary: g.summary,
+    interpretation: {
+      domain: interpretation.domain,
+      deadline: interpretation.deadline,
+      horizon: interpretation.horizon,
+      context: interpretation.context,
+      missing: interpretation.missing,
+    },
     nodes: g.nodes.map((n) => ({
       id: n.id,
       label: n.label,

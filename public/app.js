@@ -16,8 +16,6 @@ let configuration,
   drag;
 const labels = { low: "Basso", medium: "Medio", high: "Alto", max: "Massimo" };
 const isoDate = () => new Date().toISOString().slice(0, 10);
-const future = () =>
-  new Date(Date.now() + 90 * 86400000).toISOString().slice(0, 10);
 async function api(path, body, signal) {
   const r = await fetch(path, {
     ...(body
@@ -41,7 +39,8 @@ function notice(message) {
 function closeDialog() {
   $("#dialog").close();
 }
-function modal(html) {
+function modal(html, compact = false) {
+  $("#dialog").classList.toggle("composer", compact);
   $("#dialogContent").innerHTML =
     '<button class="close" id="closeDialog" aria-label="Chiudi">×</button>' +
     html;
@@ -66,28 +65,23 @@ function newThesis() {
   closeMenu();
   const current = analysis?.body.input;
   modal(
-    `<span class="eyebrow">NUOVA ANALISI</span><h2>Parti da una previsione.</h2><label class="field" for="thesis">La tua tesi</label><textarea id="thesis" maxlength="6000" placeholder="Se accade X, mi aspetto Y perché…">${escape(current?.thesis || "")}</textarea><div class="row"><div><label class="field" for="domain">Ambito</label><select id="domain"><option value="trading" ${current?.domain === "general" ? "" : "selected"}>Trading e mercati</option><option value="general" ${current?.domain === "general" ? "selected" : ""}>Qualsiasi altro ambito</option></select></div><div><label class="field" for="effort">Effort</label><select id="effort">${Object.entries(
+    `<label class="composer-title" for="thesis">Che cosa pensi possa succedere?</label><textarea id="thesis" maxlength="6000" placeholder="Scrivi la tua idea, come la racconteresti a qualcuno…">${escape(current?.thesis || "")}</textarea><div class="composer-controls"><label for="effort">Effort</label><select id="effort" aria-label="Profondità dell’analisi">${Object.entries(
       labels,
     )
       .map(
         ([v, l]) =>
-          `<option value="${v}" ${(current?.effort || "medium") === v ? "selected" : ""}>${l} · max ${configuration.effort[v].depth} livelli</option>`,
+          `<option value="${v}" ${(current?.effort || "medium") === v ? "selected" : ""}>${l}</option>`,
       )
       .join(
         "",
-      )}</select></div></div><label class="field" for="deadline">Orizzonte della tesi</label><input id="deadline" type="date" value="${escape(current?.deadline || future())}"><label class="field" for="context">Contesto e dati che vuoi fornire (facoltativo)</label><textarea id="context" maxlength="12000" placeholder="Dati, ipotesi iniziali, fonte e data di riferimento. Il modello li tratterà come materiale non verificato.">${escape(current?.context || "")}</textarea><p>L’effort guida profondità e budget della mappa. Tutti i nessi generati saranno ipotesi da verificare; nessun prezzo o dato di mercato è acquisito automaticamente.</p><p class="muted">${escape(configuration.provider)} · ${escape(configuration.model || "modello non configurato")} · ${configuration.local ? "inferenza locale" : "invio a " + escape(configuration.endpoint)}</p><div class="error" id="formError"></div><div class="actions"><button id="configure">Connessione</button><button class="primary" id="analyze">Analizza la tesi →</button></div>`,
+      )}</select><button class="primary" id="analyze">Esplora →</button></div><div class="error" id="formError" role="alert"></div>`,
+    true,
   );
-  $("#configure").onclick = () => {
-    closeDialog();
-    settings();
-  };
+  $("#thesis").focus();
   $("#analyze").onclick = async () => {
     const input = {
       thesis: $("#thesis").value.trim(),
-      domain: $("#domain").value,
       effort: $("#effort").value,
-      deadline: $("#deadline").value,
-      context: $("#context").value,
     };
     if (input.thesis.length < 15) {
       $("#formError").textContent = "Scrivi una tesi di almeno 15 caratteri.";
@@ -178,7 +172,7 @@ function inspect(id) {
     incoming = g.edges.filter((e) => e.to === id);
   $("#inspector").hidden = false;
   $("#inspector").innerHTML =
-    `<button class="close" id="closeInspector" aria-label="Chiudi dettaglio">×</button><span class="badge">Ipotesi non verificata</span><h3>${escape(n.label)}</h3><div class="callout">${escape(n.challenge)}</div><h4>Meccanismo causale</h4>${incoming.length ? incoming.map((e) => `<p>${escape(e.mechanism)}</p>`).join("") : "<p>Questa è la tesi iniziale.</p>"}<h4>Assunzioni</h4><ul>${n.assumptions.map((s) => `<li>${escape(s)}</li>`).join("")}</ul><h4>Che cosa la smentirebbe</h4><p>${escape(n.falsifier)}</p><h4>Dati da raccogliere</h4><ul>${n.evidenceNeeded.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>${analysis.body.input.domain === "trading" ? `<h4>Tesi e prezzo di mercato</h4><p>${escape(g.trading.marketVsThesis)}</p><h4>Già scontato nel prezzo?</h4><p>${escape(g.trading.pricedIn)}</p><h4>Catalizzatori</h4><ul>${g.trading.catalysts.map((s) => `<li>${escape(s)}</li>`).join("")}</ul><h4>Invalidazione</h4><p>${escape(g.trading.invalidation)}</p>` : ""}`;
+    `<button class="close" id="closeInspector" aria-label="Chiudi dettaglio">×</button><span class="badge">Ipotesi non verificata</span><h3>${escape(n.label)}</h3><div class="callout">${escape(n.challenge)}</div><h4>Meccanismo causale</h4>${incoming.length ? incoming.map((e) => `<p>${escape(e.mechanism)}</p>`).join("") : "<p>Questa è la tesi iniziale.</p>"}${n.kind === "thesis" && g.interpretation ? `<h4>Dal tuo testo</h4><p>${g.interpretation.domain === "trading" ? "Trading e mercati" : "Ambito generale"} · ${escape(g.interpretation.horizon || "Orizzonte da chiarire")}</p>${g.interpretation.context ? `<p>${escape(g.interpretation.context)}</p>` : ""}${g.interpretation.missing.length ? `<h4>Da chiarire</h4><ul>${g.interpretation.missing.map((x) => `<li>${escape(x)}</li>`).join("")}</ul>` : ""}` : ""}<h4>Assunzioni</h4><ul>${n.assumptions.map((s) => `<li>${escape(s)}</li>`).join("")}</ul><h4>Che cosa la smentirebbe</h4><p>${escape(n.falsifier)}</p><h4>Dati da raccogliere</h4><ul>${n.evidenceNeeded.map((s) => `<li>${escape(s)}</li>`).join("")}</ul>${(g.interpretation?.domain || analysis.body.input.domain) === "trading" ? `<h4>Tesi e prezzo di mercato</h4><p>${escape(g.trading.marketVsThesis)}</p><h4>Già scontato nel prezzo?</h4><p>${escape(g.trading.pricedIn)}</p><h4>Catalizzatori</h4><ul>${g.trading.catalysts.map((s) => `<li>${escape(s)}</li>`).join("")}</ul><h4>Invalidazione</h4><p>${escape(g.trading.invalidation)}</p>` : ""}`;
   $("#closeInspector").onclick = () => {
     $("#inspector").hidden = true;
     selected = null;
@@ -218,7 +212,10 @@ function saveDialog() {
       weight: 100,
       operator: "gte",
       threshold: null,
-      due: analysis.body.input.deadline,
+      due:
+        analysis.body.graph.interpretation?.deadline ||
+        analysis.body.input.deadline ||
+        "",
     },
   ];
   modal(
@@ -247,7 +244,10 @@ function saveDialog() {
       weight: 0,
       operator: "gte",
       threshold: null,
-      due: analysis.body.input.deadline,
+      due:
+        analysis.body.graph.interpretation?.deadline ||
+        analysis.body.input.deadline ||
+        "",
     });
     list();
   };
