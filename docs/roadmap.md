@@ -1,5 +1,7 @@
 # Dalla base reale al prodotto
 
+Aggiornamento 19 settembre 2026: prima di ampliare le funzionalità, seguire lo [studio sulla qualità](../outputs/STUDIO-QUALITA-NESSO.md) e il [set iniziale di casi](../outputs/nesso-quality-cases.json). Priorità: nessi e obiezioni tipizzati, nucleo breve, espansione per ramo, verifica delle premesse e valutazione comparativa. Queste sono proposte da implementare e misurare, non capacità già disponibili.
+
 ## 1. Collegamento e valutazione del modello
 
 - Scegliere provider/model ID e configurare la chiave server-side.
