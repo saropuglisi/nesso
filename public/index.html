@@ -34,6 +34,11 @@
       ><button id="saveButton" disabled>Fissa criteri</button>
     </div>
     <main id="workspace">
+      <div id="liveBar" hidden role="status">
+        <span class="live-dot"></span><span id="liveMessage"></span
+        ><button id="stopAnalysis">Interrompi</button
+        ><button id="retryAnalysis" hidden>Riprova</button>
+      </div>
       <div id="canvas">
         <div id="graph"></div>
         <div id="empty">

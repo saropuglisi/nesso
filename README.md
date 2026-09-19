@@ -2,6 +2,10 @@
 
 Laboratorio di pensiero critico: una tesi diventa una mappa causale, con assunzioni, alternative e condizioni di invalidazione. Ambito generale oppure profilo trading. **Prima base reale, locale e single-user**, con inferenza via API o modello locale; non è ancora un servizio pubblico multiutente.
 
+L’avvio richiede solo tesi ed effort. Ambito, contesto e orizzonte vengono ricavati dal testo, lasciando esplicite le informazioni mancanti. Con “Esplora” il compositore si chiude e la mappa riceve nodi e archi in streaming: le caselle sono già esplorabili mentre la generazione prosegue. “Interrompi” annulla la richiesta; una bozza incompleta resta visibile ma non viene registrata come analisi valida. Il salvataggio avviene solo dopo la validazione dell’intera risposta. I tempi di comparsa dipendono dal provider: durante l’eventuale elaborazione iniziale compare soltanto la tesi dell’utente.
+
+Streaming: OpenRouter/API compatibili via SSE, OpenAI Responses via eventi SSE, Ollama via NDJSON. Riferimento: [documentazione streaming OpenRouter](https://openrouter.ai/docs/api/reference/streaming). I test usano stream controllati, senza chiamate a pagamento.
+
 ## Avvio
 
 Richiede Node.js >= 22.13 (verificato con 25.6). Nessuna dipendenza npm esterna. SQLite è quello incluso in Node; alcune versioni mostrano un avviso sperimentale.

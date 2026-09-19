@@ -90,7 +90,7 @@ export function createApp({
           body && typeof body === "object" && !Array.isArray(body),
           "La richiesta deve essere un oggetto.",
         );
-        if (path === "/api/analyze") {
+        if (path === "/api/analyze" || path === "/api/analyze/stream") {
           requireThat(
             !busy,
             "Un’analisi è già in corso. Attendi il completamento.",
@@ -99,22 +99,53 @@ export function createApp({
           const input = inputSpec(body);
           busy = true;
           const controller = new AbortController();
+          const streaming = path.endsWith("/stream");
+          const emit = (type, data) => {
+            if (!res.destroyed)
+              res.write(JSON.stringify({ type, data }) + "\n");
+          };
+          if (streaming) {
+            res.writeHead(200, {
+              "content-type": "application/x-ndjson; charset=utf-8",
+              "cache-control": "no-store",
+              "x-content-type-options": "nosniff",
+            });
+            res.flushHeaders();
+            emit("start", { message: "Esploro i nessi della tua tesi…" });
+          }
           res.on("close", () => {
             if (!res.writableEnded) controller.abort();
           });
           try {
-            const result = await inference(provider, input, controller.signal);
+            const result = await inference(
+              provider,
+              input,
+              controller.signal,
+              undefined,
+              streaming ? emit : undefined,
+            );
             if (controller.signal.aborted) return;
             const graph = validateGraph(result.graph, input.effort);
-            return send(
-              201,
-              store.add("analysis", {
-                schemaVersion: "nesso.analysis.v1",
-                input,
-                graph,
-                provenance: result.provenance,
-              }),
-            );
+            const record = store.add("analysis", {
+              schemaVersion: "nesso.analysis.v1",
+              input,
+              graph,
+              provenance: result.provenance,
+            });
+            if (streaming) {
+              emit("complete", record);
+              return res.end();
+            }
+            return send(201, record);
+          } catch (e) {
+            if (!streaming) throw e;
+            emit("error", {
+              message:
+                e instanceof AppError
+                  ? e.message
+                  : "Generazione interrotta. La mappa parziale non è stata salvata.",
+            });
+            res.end();
           } finally {
             busy = false;
           }

@@ -317,6 +317,69 @@ dialog {
   box-shadow: 0 25px 90px #263b2f25;
   color: inherit;
 }
+#liveBar {
+  position: fixed;
+  left: 50%;
+  bottom: 68px;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  max-width: calc(100vw - 24px);
+  width: max-content;
+  background: #fff;
+  border: 1px solid #dbe4dd;
+  border-radius: 24px;
+  box-shadow: 0 8px 30px #263b2f16;
+  font-size: 13px;
+}
+#liveBar[hidden] {
+  display: none;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6c8c78;
+  flex-shrink: 0;
+}
+.running .live-dot {
+  animation: breathe 1.5s ease-in-out infinite;
+}
+.node.arriving {
+  animation: appear 0.45s ease-out both;
+}
+.node {
+  transition:
+    left 0.4s ease,
+    top 0.4s ease;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    translate: 0 10px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes breathe {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .node.arriving,
+  .running .live-dot {
+    animation: none;
+  }
+  .node {
+    transition: none;
+  }
+}
 dialog::backdrop {
   background: #25392d40;
   backdrop-filter: blur(3px);

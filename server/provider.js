@@ -1,4 +1,5 @@
 import { EFFORT, GRAPH_SCHEMA, AppError, requireThat, hash } from "./domain.js";
+import { readProviderStream } from "./stream.js";
 
 export const PROMPT_VERSION = "nesso-analysis-v2";
 export function config(env = process.env) {
@@ -117,7 +118,7 @@ export function requestFor(c, input) {
     },
   };
 }
-export async function infer(c, input, signal, fetchImpl = fetch) {
+export async function infer(c, input, signal, fetchImpl = fetch, onProgress) {
   requireThat(
     c.model,
     "Configura un modello in NESSO_MODEL nel file .env.",
@@ -130,6 +131,7 @@ export async function infer(c, input, signal, fetchImpl = fetch) {
   );
   const req = requestFor(c, input),
     started = Date.now();
+  if (onProgress) req.body.stream = true;
   let res;
   try {
     res = await fetchImpl(req.url, {
@@ -161,10 +163,38 @@ export async function infer(c, input, signal, fetchImpl = fetch) {
     );
   }
   let raw;
-  try {
-    raw = await res.json();
-  } catch {
-    throw new AppError("Risposta del provider non leggibile.", 502);
+  if (onProgress) {
+    const streamed = await readProviderStream(res, c.provider, onProgress);
+    raw =
+      c.provider === "ollama"
+        ? {
+            done: true,
+            message: { content: streamed.content },
+            usage: streamed.usage,
+          }
+        : c.provider === "openai"
+          ? {
+              status: "completed",
+              output: [
+                { content: [{ type: "output_text", text: streamed.content }] },
+              ],
+              usage: streamed.usage,
+            }
+          : {
+              choices: [
+                {
+                  finish_reason: "stop",
+                  message: { content: streamed.content },
+                },
+              ],
+              usage: streamed.usage,
+            };
+  } else {
+    try {
+      raw = await res.json();
+    } catch {
+      throw new AppError("Risposta del provider non leggibile.", 502);
+    }
   }
   requireThat(
     raw && typeof raw === "object" && !Array.isArray(raw),

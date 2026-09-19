@@ -14,6 +14,8 @@ let configuration,
   pan = { x: 35, y: 30 },
   selected,
   drag;
+let liveController,
+  liveMessage = "";
 const labels = { low: "Basso", medium: "Medio", high: "Alto", max: "Massimo" };
 const isoDate = () => new Date().toISOString().slice(0, 10);
 async function api(path, body, signal) {
@@ -62,6 +64,7 @@ function settings() {
   );
 }
 function newThesis() {
+  if (liveController) return;
   closeMenu();
   const current = analysis?.body.input;
   modal(
@@ -87,33 +90,161 @@ function newThesis() {
       $("#formError").textContent = "Scrivi una tesi di almeno 15 caratteri.";
       return;
     }
-    const controller = new AbortController();
-    $("#dialog").addEventListener("close", () => controller.abort(), {
-      once: true,
-    });
-    $("#analyze").disabled = true;
-    $("#analyze").textContent = "Analisi in corso…";
-    $("#formError").textContent = "";
-    try {
-      const generated = await api("/api/analyze", input, controller.signal);
-      analysis = generated;
-      frozen = null;
-      selected = null;
-      $("#inspector").hidden = true;
-      pan = { x: 35, y: 30 };
-      closeDialog();
-      mapView();
+    closeDialog();
+    await startLiveAnalysis(input);
+  };
+}
+async function startLiveAnalysis(input) {
+  const controller = new AbortController();
+  liveController = controller;
+  frozen = null;
+  selected = null;
+  $("#graph").replaceChildren();
+  $("#inspector").hidden = true;
+  pan = { x: 35, y: 30 };
+  liveMessage = "Esploro i nessi della tua tesi…";
+  analysis = {
+    draft: true,
+    body: {
+      input,
+      provenance: { model: configuration.model },
+      graph: {
+        title: "La tua tesi prende forma",
+        summary: "",
+        edges: [],
+        uncertainties: [],
+        trading: {
+          catalysts: [],
+          pricedIn: "",
+          invalidation: "",
+          marketVsThesis: "",
+        },
+        nodes: [
+          {
+            id: "__input",
+            kind: "thesis",
+            label: input.thesis,
+            depth: 0,
+            assumptions: [],
+            evidenceNeeded: [],
+            challenge: "Sto analizzando la tua tesi…",
+            falsifier: "In elaborazione",
+          },
+        ],
+      },
+    },
+  };
+  mapView();
+  $("#liveBar").hidden = false;
+  $("#stopAnalysis").hidden = false;
+  $("#retryAnalysis").hidden = true;
+  $("#stopAnalysis").onclick = () => controller.abort();
+  $("#retryAnalysis").onclick = () => startLiveAnalysis(input);
+  $("#newButton").disabled = $("#journalButton").disabled = true;
+  render();
+  let complete = false;
+  const nodes = new Map(),
+    edges = [];
+  function event(frame) {
+    if (frame.type === "error") throw new Error(frame.data.message);
+    if (frame.type === "complete") {
+      analysis = frame.data;
+      complete = true;
+      $("#liveBar").hidden = true;
       render();
-      notice("Analisi generata e archiviata. Ora controlla le assunzioni.");
-    } catch (e) {
-      if ($("#dialog").open) {
-        $("#formError").textContent =
-          e.name === "AbortError" ? "Analisi annullata." : e.message;
-        $("#analyze").disabled = false;
-        $("#analyze").textContent = "Riprova analisi →";
+      if (selected && analysis.body.graph.nodes.some((n) => n.id === selected))
+        inspect(selected);
+      return;
+    }
+    if (frame.type === "node") {
+      const n = frame.data;
+      if (
+        !n ||
+        typeof n.id !== "string" ||
+        typeof n.label !== "string" ||
+        !["thesis", "consequence", "alternative"].includes(n.kind) ||
+        !Array.isArray(n.assumptions) ||
+        !Array.isArray(n.evidenceNeeded)
+      )
+        return;
+      nodes.set(n.id, { ...n, depth: n.kind === "thesis" ? 0 : 1 });
+      if (selected === "__input") {
+        selected = null;
+        $("#inspector").hidden = true;
+      }
+    } else if (frame.type === "edge") {
+      const e = frame.data;
+      if (!e || typeof e.from !== "string" || typeof e.to !== "string") return;
+      edges.push(e);
+    } else return;
+    if (!nodes.size) return;
+    const g = analysis.body.graph;
+    g.nodes = [...nodes.values()];
+    g.edges = edges.filter(
+      (e) => nodes.has(e.from) && nodes.has(e.to) && e.from !== e.to,
+    );
+    // Bounded relaxation keeps an invalid partial cycle from blocking the UI.
+    for (let i = 0; i < nodes.size; i++) {
+      for (const e of g.edges) {
+        const a = nodes.get(e.from),
+          b = nodes.get(e.to);
+        if (b.kind !== "thesis")
+          b.depth = Math.min(nodes.size, Math.max(b.depth, a.depth + 1));
       }
     }
-  };
+    liveMessage = `${nodes.size} caselle · ${g.edges.length} nessi · continuo a esplorare…`;
+    render();
+    if (selected && nodes.has(selected)) inspect(selected);
+  }
+  try {
+    const response = await fetch("/api/analyze/stream", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input),
+      signal: controller.signal,
+    });
+    if (!response.ok)
+      throw new Error(
+        (await response.json()).error || "Analisi non disponibile.",
+      );
+    const reader = response.body.getReader(),
+      decoder = new TextDecoder();
+    let buffer = "";
+    try {
+      while (true) {
+        const next = await reader.read();
+        if (next.done) break;
+        buffer += decoder.decode(next.value, { stream: true });
+        let end;
+        while ((end = buffer.indexOf("\n")) >= 0) {
+          const line = buffer.slice(0, end);
+          buffer = buffer.slice(end + 1);
+          if (line) event(JSON.parse(line));
+        }
+      }
+      if (!complete)
+        throw new Error(
+          "Connessione interrotta. La bozza non è stata salvata.",
+        );
+    } finally {
+      await reader.cancel().catch(() => {});
+      reader.releaseLock();
+    }
+    notice(
+      "Mappa completata. Puoi esplorare le assunzioni e fissare i criteri.",
+    );
+  } catch (e) {
+    liveMessage = controller.signal.aborted
+      ? "Analisi interrotta · bozza non salvata"
+      : e.message;
+    $("#stopAnalysis").hidden = true;
+    $("#retryAnalysis").hidden = false;
+    render();
+  } finally {
+    liveController = null;
+    $("#newButton").disabled = $("#journalButton").disabled = false;
+    render();
+  }
 }
 function render() {
   if (!analysis) return;
@@ -122,15 +253,21 @@ function render() {
   $("#titleLabel").textContent = g.title;
   $("#effortLabel").textContent =
     "Effort: " + labels[analysis.body.input.effort];
-  $("#saveButton").disabled = Boolean(frozen);
-  $("#reviseButton").disabled = false;
+  $("#saveButton").disabled = Boolean(frozen) || Boolean(analysis.draft);
+  $("#reviseButton").disabled = Boolean(liveController);
   $("#status").textContent =
-    (frozen ? "Versione fissata" : "Ipotesi generate") +
+    (analysis.draft
+      ? "Bozza · non salvata"
+      : frozen
+        ? "Versione fissata"
+        : "Ipotesi generate") +
     " · " +
     analysis.body.provenance.model +
     " · " +
     g.nodes.length +
     " nodi";
+  $("#liveMessage").textContent = liveMessage;
+  $("#liveBar").classList.toggle("running", Boolean(liveController));
   const grouped = {};
   g.nodes.forEach((n) => (grouped[n.depth] ??= []).push(n));
   const positions = new Map();
@@ -151,17 +288,46 @@ function render() {
     .join("");
   $("#graph").style.width = width + "px";
   $("#graph").style.height = height + "px";
-  $("#graph").innerHTML =
-    `<svg width="${width}" height="${height}"><defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#90a699"/></marker></defs>${edges}</svg>` +
-    g.nodes
-      .map(
-        (n) =>
-          `<button class="node ${n.kind} ${n.id === selected ? "selected" : ""}" data-node="${escape(n.id)}" style="left:${positions.get(n.id).x}px;top:${positions.get(n.id).y}px"><small>${n.kind === "thesis" ? "Tesi" : n.kind === "alternative" ? "Alternativa" : "Conseguenza"}<span>L${n.depth}</span></small><strong>${escape(n.label)}</strong><span>Ipotesi · da verificare</span></button>`,
-      )
-      .join("");
-  document
-    .querySelectorAll("[data-node]")
-    .forEach((b) => (b.onclick = () => inspect(b.dataset.node)));
+  let svg = $("#graph svg");
+  if (!svg) {
+    svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    $("#graph").prepend(svg);
+  }
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", height);
+  const drawing = `<defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0 0L6 3L0 6" fill="none" stroke="#90a699"/></marker></defs>${edges}`;
+  if (svg.innerHTML !== drawing) svg.innerHTML = drawing;
+  const existing = new Map(
+    [...document.querySelectorAll("[data-node]")].map((el) => [
+      el.dataset.node,
+      el,
+    ]),
+  );
+  for (const n of g.nodes) {
+    let button = existing.get(n.id);
+    if (!button) {
+      button = document.createElement("button");
+      button.dataset.node = n.id;
+      button.classList.add("arriving");
+      button.addEventListener(
+        "animationend",
+        () => button.classList.remove("arriving"),
+        { once: true },
+      );
+      button.onclick = () => inspect(n.id);
+      $("#graph").append(button);
+    }
+    existing.delete(n.id);
+    button.classList.add("node");
+    for (const kind of ["thesis", "consequence", "alternative"])
+      button.classList.toggle(kind, n.kind === kind);
+    button.classList.toggle("selected", n.id === selected);
+    button.style.left = positions.get(n.id).x + "px";
+    button.style.top = positions.get(n.id).y + "px";
+    const content = `<small>${n.kind === "thesis" ? "Tesi" : n.kind === "alternative" ? "Alternativa" : "Conseguenza"}<span>L${n.depth}</span></small><strong>${escape(n.label)}</strong><span>${analysis.draft ? "In costruzione · provvisorio" : "Ipotesi · da verificare"}</span>`;
+    if (button.innerHTML !== content) button.innerHTML = content;
+  }
+  for (const el of existing.values()) el.remove();
   transform();
 }
 function inspect(id) {
