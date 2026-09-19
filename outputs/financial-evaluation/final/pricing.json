@@ -1,0 +1,373 @@
+{
+  "id": "pricing",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "input": {
+    "thesis": "Caso sintetico, non dati reali: vendo 1000 unità al mese a 100 euro, costo variabile 60 euro per unità e costi fissi 20000 euro al mese. Voglio tagliare il prezzo del 20% e prevedo di vendere 1300 unità al mese. Sostengo che così aumenteranno sia ricavi sia profitto operativo. Verifica la tesi assumendo costi unitari e fissi invariati.",
+    "effort": "low",
+    "domain": null,
+    "deadline": null,
+    "referenceDate": "2026-09-19",
+    "context": ""
+  },
+  "expected": [
+    "ricavi 100000 ->104000",
+    "profitto 20000 ->6000",
+    "ricavi +4%, profitto -70%",
+    "2000 unità per mantenere profitto precedente"
+  ],
+  "response": {
+    "graph": {
+      "focus": {
+        "claim": "Il prezzo scontato produce 104.000 euro di ricavi e 6000 euro di utile operativo con 1300 unità.",
+        "why": "Il passaggio decisivo è se la quantità aggiuntiva compensa il margine perso su ogni unità.",
+        "assumption": "I costi variabili per unità e i costi fissi restano costanti nello scenario.",
+        "test": "Confrontare quantità vendute, costi unitari e utile osservato dopo l’introduzione dello sconto."
+      },
+      "financial": {
+        "conclusion": "Con lo sconto del 20%, i ricavi dello scenario passano da 100.000 a 104.000 euro, mentre l’utile operativo passa da 20.000 a 6000 euro (ricavi +4%, utile operativo -70% rispetto alla base); per conservare l’utile operativo iniziale servono 2000 unità.",
+        "limitation": "È uno scenario deterministico: mantiene costi variabili e fissi costanti e non stima domanda, cannibalizzazione, imposte, resi o effetti temporali.",
+        "calculations": [
+          {
+            "label": "Ricavi dopo lo sconto",
+            "expression": "(100)*(1-(20)/100)*(1300)",
+            "unit": "euro",
+            "basis": "Prezzo, sconto e nuova quantità forniti nello scenario."
+          },
+          {
+            "label": "Utile operativo dopo lo sconto",
+            "expression": "((100)*(1-(20)/100)-(60))*(1300)-(20000)",
+            "unit": "euro",
+            "basis": "Costi variabili per unità e costi fissi invariati nello scenario."
+          },
+          {
+            "label": "Quantità per conservare l’utile iniziale",
+            "expression": "(((100)-(60))*(1000))/((100)*(1-(20)/100)-(60))",
+            "unit": "unità",
+            "basis": "Quantità che conserva l’utile operativo iniziale prima dei costi fissi, con costi invariati."
+          }
+        ]
+      },
+      "title": "Verifica dello scenario finanziario",
+      "summary": "Con lo sconto del 20%, i ricavi dello scenario passano da 100.000 a 104.000 euro, mentre l’utile operativo passa da 20.000 a 6000 euro (ricavi +4%, utile operativo -70% rispetto alla base); per conservare l’utile operativo iniziale servono 2000 unità.",
+      "interpretation": {
+        "domain": "general",
+        "deadline": null,
+        "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+        "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+        "missing": []
+      },
+      "nodes": [
+        {
+          "id": "n0",
+          "kind": "thesis",
+          "label": "Caso sintetico, non dati reali: vendo 1000 unità al mese a 100 euro, costo variabile 60 euro per unità e costi fissi 20000 euro al mese. Voglio tagliare il prezzo del 20% e prevedo di vendere 1300 unità al mese. Sostengo che così aumenteranno sia ricavi sia profitto operativo. Verifica la tesi assumendo costi unitari e fissi invariati.",
+          "assumptions": [
+            "I numeri forniti descrivono lo scenario da analizzare."
+          ],
+          "challenge": "Il passaggio decisivo è se la quantità aggiuntiva compensa il margine perso su ogni unità.",
+          "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n1",
+          "kind": "consequence",
+          "label": "Ricavi dopo lo sconto: 104.000 euro",
+          "assumptions": [
+            "Prezzo, sconto e nuova quantità forniti nello scenario."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n2",
+          "kind": "consequence",
+          "label": "Utile operativo dopo lo sconto: 6000 euro",
+          "assumptions": [
+            "Costi variabili per unità e costi fissi invariati nello scenario."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n3",
+          "kind": "alternative",
+          "label": "La domanda non compensa il margine perso",
+          "assumptions": [
+            "La quantità resta sotto 2000 unità o i costi aumentano."
+          ],
+          "challenge": "La crescita dei volumi può non recuperare la riduzione del margine unitario.",
+          "falsifier": "La quantità e i costi osservati sostengono almeno l’utile operativo iniziale nel periodo definito.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "n0",
+          "to": "n1",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n2",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n3",
+          "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+        }
+      ],
+      "uncertainties": [
+        "È uno scenario deterministico: mantiene costi variabili e fissi costanti e non stima domanda, cannibalizzazione, imposte, resi o effetti temporali."
+      ],
+      "trading": {
+        "instruments": [],
+        "catalysts": [],
+        "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+        "invalidation": "Confrontare quantità vendute, costi unitari e utile osservato dopo l’introduzione dello sconto.",
+        "timingRisks": [],
+        "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+      }
+    },
+    "provenance": {
+      "provider": "openai-compatible",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "endpoint": "https://openrouter.ai/api/v1",
+      "local": false,
+      "promptVersion": "nesso-financial-kernel-v1",
+      "promptHash": "a3b99c3ae5d9892c8f0f0909b7e1762b205501e7dd618f446d32b343f3b942b1",
+      "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+      "generatedAt": "2026-09-19T10:40:08.186Z",
+      "durationMs": 30244,
+      "usage": {
+        "prompt_tokens": 1124,
+        "completion_tokens": 519,
+        "total_tokens": 1643,
+        "cost": 0.000432,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0.000432,
+          "upstream_inference_prompt_cost": 0.00015174,
+          "upstream_inference_completions_cost": 0.00028026
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "stages": [
+        {
+          "provider": "openai-compatible",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "endpoint": "https://openrouter.ai/api/v1",
+          "local": false,
+          "promptVersion": "nesso-analysis-v4-financial",
+          "promptHash": "a3b99c3ae5d9892c8f0f0909b7e1762b205501e7dd618f446d32b343f3b942b1",
+          "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+          "generatedAt": "2026-09-19T10:40:08.186Z",
+          "durationMs": 30241,
+          "usage": {
+            "prompt_tokens": 1124,
+            "completion_tokens": 519,
+            "total_tokens": 1643,
+            "cost": 0.000432,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000432,
+              "upstream_inference_prompt_cost": 0.00015174,
+              "upstream_inference_completions_cost": 0.00028026
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ],
+      "calculationEngine": "deterministic-finance-v1",
+      "extractedScenario": {
+        "kind": "pricing",
+        "currency": "euro",
+        "values": {
+          "price": 100,
+          "quantity": 1000,
+          "variableCost": 60,
+          "fixedCost": 20000,
+          "discountPercent": 20,
+          "newQuantity": 1300
+        },
+        "sources": {
+          "price": "vendo 1000 unità al mese a 100 euro",
+          "quantity": "vendo 1000 unità al mese a 100 euro",
+          "variableCost": "costo variabile 60 euro per unità",
+          "fixedCost": "costi fissi 20000 euro al mese",
+          "discountPercent": "tagliare il prezzo del 20%",
+          "newQuantity": "prevedo di vendere 1300 unità al mese"
+        }
+      }
+    }
+  },
+  "validatedGraph": {
+    "focus": {
+      "claim": "Il prezzo scontato produce 104.000 euro di ricavi e 6000 euro di utile operativo con 1300 unità.",
+      "why": "Il passaggio decisivo è se la quantità aggiuntiva compensa il margine perso su ogni unità.",
+      "assumption": "I costi variabili per unità e i costi fissi restano costanti nello scenario.",
+      "test": "Confrontare quantità vendute, costi unitari e utile osservato dopo l’introduzione dello sconto."
+    },
+    "financial": {
+      "conclusion": "Con lo sconto del 20%, i ricavi dello scenario passano da 100.000 a 104.000 euro, mentre l’utile operativo passa da 20.000 a 6000 euro (ricavi +4%, utile operativo -70% rispetto alla base); per conservare l’utile operativo iniziale servono 2000 unità.",
+      "limitation": "È uno scenario deterministico: mantiene costi variabili e fissi costanti e non stima domanda, cannibalizzazione, imposte, resi o effetti temporali.",
+      "calculations": [
+        {
+          "label": "Ricavi dopo lo sconto",
+          "expression": "(100)*(1-(20)/100)*(1300)",
+          "unit": "euro",
+          "basis": "Prezzo, sconto e nuova quantità forniti nello scenario.",
+          "result": 104000,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Utile operativo dopo lo sconto",
+          "expression": "((100)*(1-(20)/100)-(60))*(1300)-(20000)",
+          "unit": "euro",
+          "basis": "Costi variabili per unità e costi fissi invariati nello scenario.",
+          "result": 6000,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Quantità per conservare l’utile iniziale",
+          "expression": "(((100)-(60))*(1000))/((100)*(1-(20)/100)-(60))",
+          "unit": "unità",
+          "basis": "Quantità che conserva l’utile operativo iniziale prima dei costi fissi, con costi invariati.",
+          "result": 2000,
+          "arithmeticValid": true
+        }
+      ]
+    },
+    "title": "Verifica dello scenario finanziario",
+    "summary": "Con lo sconto del 20%, i ricavi dello scenario passano da 100.000 a 104.000 euro, mentre l’utile operativo passa da 20.000 a 6000 euro (ricavi +4%, utile operativo -70% rispetto alla base); per conservare l’utile operativo iniziale servono 2000 unità.",
+    "interpretation": {
+      "domain": "general",
+      "deadline": null,
+      "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+      "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+      "missing": []
+    },
+    "nodes": [
+      {
+        "id": "n0",
+        "label": "Caso sintetico, non dati reali: vendo 1000 unità al mese a 100 euro, costo variabile 60 euro per unità e costi fissi 20000 euro al mese. Voglio tagliare il prezzo del 20% e prevedo di vendere 1300 unità al mese. Sostengo che così aumenteranno sia ricavi sia profitto operativo. Verifica la tesi assumendo costi unitari e fissi invariati.",
+        "kind": "thesis",
+        "assumptions": [
+          "I numeri forniti descrivono lo scenario da analizzare."
+        ],
+        "challenge": "Il passaggio decisivo è se la quantità aggiuntiva compensa il margine perso su ogni unità.",
+        "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 0,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n1",
+        "label": "Ricavi dopo lo sconto: 104.000 euro",
+        "kind": "consequence",
+        "assumptions": [
+          "Prezzo, sconto e nuova quantità forniti nello scenario."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n2",
+        "label": "Utile operativo dopo lo sconto: 6000 euro",
+        "kind": "consequence",
+        "assumptions": [
+          "Costi variabili per unità e costi fissi invariati nello scenario."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n3",
+        "label": "La domanda non compensa il margine perso",
+        "kind": "alternative",
+        "assumptions": [
+          "La quantità resta sotto 2000 unità o i costi aumentano."
+        ],
+        "challenge": "La crescita dei volumi può non recuperare la riduzione del margine unitario.",
+        "falsifier": "La quantità e i costi osservati sostengono almeno l’utile operativo iniziale nel periodo definito.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      }
+    ],
+    "edges": [
+      {
+        "from": "n0",
+        "to": "n1",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n2",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n3",
+        "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+      }
+    ],
+    "uncertainties": [
+      "È uno scenario deterministico: mantiene costi variabili e fissi costanti e non stima domanda, cannibalizzazione, imposte, resi o effetti temporali."
+    ],
+    "trading": {
+      "instruments": [],
+      "catalysts": [],
+      "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+      "invalidation": "Confrontare quantità vendute, costi unitari e utile osservato dopo l’introduzione dello sconto.",
+      "timingRisks": [],
+      "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+    }
+  },
+  "structurallyValid": true,
+  "elapsedMs": 30247
+}

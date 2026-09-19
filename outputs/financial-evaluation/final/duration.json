@@ -1,0 +1,367 @@
+{
+  "id": "duration",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "input": {
+    "thesis": "Caso sintetico: obbligazione senza opzioni, duration modificata 7, prezzo100. La banca centrale taglia il tasso ufficiale di 50 punti base. Dico che il prezzo deve salire esattamente al103.5. Valuta separando il caso in cui il rendimento richiesto di questa obbligazione scende anch esso di50bp dal caso in cui non cambia. Ignora cedola nel periodo, spread costanti, ma non assumere che convessità sia zero.",
+    "effort": "low",
+    "domain": null,
+    "deadline": null,
+    "referenceDate": "2026-09-19",
+    "context": ""
+  },
+  "expected": [
+    "+3.5% solo approssimazione se yield-50bp",
+    "tasso ufficiale non necessariamente yield",
+    "convessità impedisce esattamente103.5",
+    "se yield invariato nessun effetto prezzo da duration"
+  ],
+  "response": {
+    "graph": {
+      "focus": {
+        "claim": "La variazione lineare stimata è +3,5 unità monetarie, ma richiede che il rendimento richiesto cambi di -50 punti base.",
+        "why": "Il passaggio decisivo è il movimento del rendimento richiesto per questo titolo, non il movimento isolato del tasso ufficiale.",
+        "assumption": "La duration modificata resta applicabile localmente e gli altri fattori del titolo non cambiano nel confronto.",
+        "test": "Osservare rendimento richiesto, prezzo e spread del titolo nello stesso intervallo per verificare la direzione e la magnitudine locale."
+      },
+      "financial": {
+        "conclusion": "Con una variazione del rendimento richiesto di -50 punti base, la variazione lineare del prezzo è +3,5 unità monetarie e il prezzo approssimato è 103,5 unità monetarie; se il rendimento resta invariato (0 punti base), il prezzo resta 100 unità monetarie. La precisione dipende dal rendimento richiesto dell’obbligazione, non dal solo tasso ufficiale.",
+        "limitation": "È un’approssimazione lineare locale basata sulla duration modificata: non inventa né stima la convessità, la cedola, lo spread o il passaggio dal tasso ufficiale al rendimento richiesto.",
+        "calculations": [
+          {
+            "label": "Variazione lineare del prezzo",
+            "expression": "(100)*(-(7))*(-50)/10000",
+            "unit": "unità monetarie",
+            "basis": "Duration modificata, prezzo e variazione del rendimento richiesto forniti nello scenario."
+          },
+          {
+            "label": "Prezzo approssimato dopo la variazione del rendimento",
+            "expression": "(100)+(100)*(-(7))*(-50)/10000",
+            "unit": "unità monetarie",
+            "basis": "Approssimazione lineare locale; non include convessità."
+          },
+          {
+            "label": "Prezzo con rendimento invariato",
+            "expression": "(100)+(100)*0",
+            "unit": "unità monetarie",
+            "basis": "Scenario separato in cui il rendimento richiesto dell’obbligazione resta invariato."
+          }
+        ]
+      },
+      "title": "Verifica dello scenario finanziario",
+      "summary": "Con una variazione del rendimento richiesto di -50 punti base, la variazione lineare del prezzo è +3,5 unità monetarie e il prezzo approssimato è 103,5 unità monetarie; se il rendimento resta invariato (0 punti base), il prezzo resta 100 unità monetarie. La precisione dipende dal rendimento richiesto dell’obbligazione, non dal solo tasso ufficiale.",
+      "interpretation": {
+        "domain": "trading",
+        "deadline": null,
+        "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+        "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+        "missing": []
+      },
+      "nodes": [
+        {
+          "id": "n0",
+          "kind": "thesis",
+          "label": "Caso sintetico: obbligazione senza opzioni, duration modificata 7, prezzo100. La banca centrale taglia il tasso ufficiale di 50 punti base. Dico che il prezzo deve salire esattamente al103.5. Valuta separando il caso in cui il rendimento richiesto di questa obbligazione scende anch esso di50bp dal caso in cui non cambia. Ignora cedola nel periodo, spread costanti, ma non assumere che convessità sia zero.",
+          "assumptions": [
+            "I numeri forniti descrivono lo scenario da analizzare."
+          ],
+          "challenge": "Il passaggio decisivo è il movimento del rendimento richiesto per questo titolo, non il movimento isolato del tasso ufficiale.",
+          "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n1",
+          "kind": "consequence",
+          "label": "Variazione lineare del prezzo: 3,5 unità monetarie",
+          "assumptions": [
+            "Duration modificata, prezzo e variazione del rendimento richiesto forniti nello scenario."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n2",
+          "kind": "consequence",
+          "label": "Prezzo approssimato dopo la variazione del rendimento: 103,5 unità monetarie",
+          "assumptions": [
+            "Approssimazione lineare locale; non include convessità."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n3",
+          "kind": "alternative",
+          "label": "Il rendimento richiesto resta invariato",
+          "assumptions": [
+            "Il cambiamento del tasso ufficiale non passa al rendimento richiesto di questa obbligazione."
+          ],
+          "challenge": "Senza una variazione del rendimento richiesto, la relazione duration-prezzo non produce un cambiamento di prezzo nello scenario.",
+          "falsifier": "Il rendimento richiesto osservato cambia insieme al prezzo e consente un confronto con l’approssimazione lineare.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "n0",
+          "to": "n1",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n2",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n3",
+          "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+        }
+      ],
+      "uncertainties": [
+        "È un’approssimazione lineare locale basata sulla duration modificata: non inventa né stima la convessità, la cedola, lo spread o il passaggio dal tasso ufficiale al rendimento richiesto."
+      ],
+      "trading": {
+        "instruments": [],
+        "catalysts": [],
+        "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+        "invalidation": "Osservare rendimento richiesto, prezzo e spread del titolo nello stesso intervallo per verificare la direzione e la magnitudine locale.",
+        "timingRisks": [],
+        "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+      }
+    },
+    "provenance": {
+      "provider": "openai-compatible",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "endpoint": "https://openrouter.ai/api/v1",
+      "local": false,
+      "promptVersion": "nesso-financial-kernel-v1",
+      "promptHash": "a8ce28fc02dc6ed7a79943caa995489e8afd5a3d86f81385f14d1972f818c2a5",
+      "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+      "generatedAt": "2026-09-19T10:43:12.212Z",
+      "durationMs": 25690,
+      "usage": {
+        "prompt_tokens": 1166,
+        "completion_tokens": 237,
+        "total_tokens": 1403,
+        "cost": 0.00028539,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0.00028539,
+          "upstream_inference_prompt_cost": 0.00015741,
+          "upstream_inference_completions_cost": 0.00012798
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "stages": [
+        {
+          "provider": "openai-compatible",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "endpoint": "https://openrouter.ai/api/v1",
+          "local": false,
+          "promptVersion": "nesso-analysis-v4-financial",
+          "promptHash": "a8ce28fc02dc6ed7a79943caa995489e8afd5a3d86f81385f14d1972f818c2a5",
+          "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+          "generatedAt": "2026-09-19T10:43:12.212Z",
+          "durationMs": 25687,
+          "usage": {
+            "prompt_tokens": 1166,
+            "completion_tokens": 237,
+            "total_tokens": 1403,
+            "cost": 0.00028539,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.00028539,
+              "upstream_inference_prompt_cost": 0.00015741,
+              "upstream_inference_completions_cost": 0.00012798
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ],
+      "calculationEngine": "deterministic-finance-v1",
+      "extractedScenario": {
+        "kind": "bond",
+        "currency": "unità monetarie",
+        "values": {
+          "price": 100,
+          "modifiedDuration": 7,
+          "yieldChangeBp": -50
+        },
+        "sources": {
+          "price": "prezzo100",
+          "modifiedDuration": "duration modificata 7",
+          "yieldChangeBp": "il rendimento richiesto di questa obbligazione scende anch esso di50bp"
+        }
+      }
+    }
+  },
+  "validatedGraph": {
+    "focus": {
+      "claim": "La variazione lineare stimata è +3,5 unità monetarie, ma richiede che il rendimento richiesto cambi di -50 punti base.",
+      "why": "Il passaggio decisivo è il movimento del rendimento richiesto per questo titolo, non il movimento isolato del tasso ufficiale.",
+      "assumption": "La duration modificata resta applicabile localmente e gli altri fattori del titolo non cambiano nel confronto.",
+      "test": "Osservare rendimento richiesto, prezzo e spread del titolo nello stesso intervallo per verificare la direzione e la magnitudine locale."
+    },
+    "financial": {
+      "conclusion": "Con una variazione del rendimento richiesto di -50 punti base, la variazione lineare del prezzo è +3,5 unità monetarie e il prezzo approssimato è 103,5 unità monetarie; se il rendimento resta invariato (0 punti base), il prezzo resta 100 unità monetarie. La precisione dipende dal rendimento richiesto dell’obbligazione, non dal solo tasso ufficiale.",
+      "limitation": "È un’approssimazione lineare locale basata sulla duration modificata: non inventa né stima la convessità, la cedola, lo spread o il passaggio dal tasso ufficiale al rendimento richiesto.",
+      "calculations": [
+        {
+          "label": "Variazione lineare del prezzo",
+          "expression": "(100)*(-(7))*(-50)/10000",
+          "unit": "unità monetarie",
+          "basis": "Duration modificata, prezzo e variazione del rendimento richiesto forniti nello scenario.",
+          "result": 3.5,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Prezzo approssimato dopo la variazione del rendimento",
+          "expression": "(100)+(100)*(-(7))*(-50)/10000",
+          "unit": "unità monetarie",
+          "basis": "Approssimazione lineare locale; non include convessità.",
+          "result": 103.5,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Prezzo con rendimento invariato",
+          "expression": "(100)+(100)*0",
+          "unit": "unità monetarie",
+          "basis": "Scenario separato in cui il rendimento richiesto dell’obbligazione resta invariato.",
+          "result": 100,
+          "arithmeticValid": true
+        }
+      ]
+    },
+    "title": "Verifica dello scenario finanziario",
+    "summary": "Con una variazione del rendimento richiesto di -50 punti base, la variazione lineare del prezzo è +3,5 unità monetarie e il prezzo approssimato è 103,5 unità monetarie; se il rendimento resta invariato (0 punti base), il prezzo resta 100 unità monetarie. La precisione dipende dal rendimento richiesto dell’obbligazione, non dal solo tasso ufficiale.",
+    "interpretation": {
+      "domain": "trading",
+      "deadline": null,
+      "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+      "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+      "missing": []
+    },
+    "nodes": [
+      {
+        "id": "n0",
+        "label": "Caso sintetico: obbligazione senza opzioni, duration modificata 7, prezzo100. La banca centrale taglia il tasso ufficiale di 50 punti base. Dico che il prezzo deve salire esattamente al103.5. Valuta separando il caso in cui il rendimento richiesto di questa obbligazione scende anch esso di50bp dal caso in cui non cambia. Ignora cedola nel periodo, spread costanti, ma non assumere che convessità sia zero.",
+        "kind": "thesis",
+        "assumptions": [
+          "I numeri forniti descrivono lo scenario da analizzare."
+        ],
+        "challenge": "Il passaggio decisivo è il movimento del rendimento richiesto per questo titolo, non il movimento isolato del tasso ufficiale.",
+        "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 0,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n1",
+        "label": "Variazione lineare del prezzo: 3,5 unità monetarie",
+        "kind": "consequence",
+        "assumptions": [
+          "Duration modificata, prezzo e variazione del rendimento richiesto forniti nello scenario."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n2",
+        "label": "Prezzo approssimato dopo la variazione del rendimento: 103,5 unità monetarie",
+        "kind": "consequence",
+        "assumptions": [
+          "Approssimazione lineare locale; non include convessità."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n3",
+        "label": "Il rendimento richiesto resta invariato",
+        "kind": "alternative",
+        "assumptions": [
+          "Il cambiamento del tasso ufficiale non passa al rendimento richiesto di questa obbligazione."
+        ],
+        "challenge": "Senza una variazione del rendimento richiesto, la relazione duration-prezzo non produce un cambiamento di prezzo nello scenario.",
+        "falsifier": "Il rendimento richiesto osservato cambia insieme al prezzo e consente un confronto con l’approssimazione lineare.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      }
+    ],
+    "edges": [
+      {
+        "from": "n0",
+        "to": "n1",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n2",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n3",
+        "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+      }
+    ],
+    "uncertainties": [
+      "È un’approssimazione lineare locale basata sulla duration modificata: non inventa né stima la convessità, la cedola, lo spread o il passaggio dal tasso ufficiale al rendimento richiesto."
+    ],
+    "trading": {
+      "instruments": [],
+      "catalysts": [],
+      "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+      "invalidation": "Osservare rendimento richiesto, prezzo e spread del titolo nello stesso intervallo per verificare la direzione e la magnitudine locale.",
+      "timingRisks": [],
+      "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+    }
+  },
+  "structurallyValid": true,
+  "elapsedMs": 25694
+}

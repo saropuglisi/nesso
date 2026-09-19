@@ -1,0 +1,354 @@
+{
+  "id": "earnings",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "input": {
+    "thesis": "Caso sintetico: società pubblica EPS trimestrale GAAP di 1.10 contro consenso GAAP 1.00. Guidance EPS anno successivo scende a 4.00 contro consenso 5.00. Titolo -8% nel giorno dei risultati. Dico che il mercato si sbaglia perché EPS ha battuto le attese e il prezzo doveva salire. Non ci sono altri dati.",
+    "effort": "low",
+    "domain": null,
+    "deadline": null,
+    "referenceDate": "2026-09-19",
+    "context": ""
+  },
+  "expected": [
+    "beat10%, guidance20% sotto consenso",
+    "non dedurre causalità certa della discesa",
+    "non affermare sottovalutazione o rialzo necessario"
+  ],
+  "response": {
+    "graph": {
+      "focus": {
+        "claim": "Il confronto trimestrale è 10% e quello annuale è -20%, con periodi distinti.",
+        "why": "Il passaggio decisivo è verificare aspettative e periodo prima di interpretare ciascuna sorpresa.",
+        "assumption": "Reported EPS, consenso, guidance e consenso guidance hanno definizioni e perimetri omogenei nel rispettivo periodo.",
+        "test": "Confrontare i dati pubblicati con il consenso omogeneo e osservare la revisione delle aspettative future senza inferire il prezzo."
+      },
+      "financial": {
+        "conclusion": "L’EPS riportato è superiore del 10% al consenso trimestrale, mentre la guidance annuale è inferiore del 20% al consenso; sono confronti separati e non implicano che il prezzo debba salire.",
+        "limitation": "Le percentuali descrivono sorprese omogenee per periodo; non collegano EPS e guidance di periodi diversi a una previsione causale sul prezzo.",
+        "calculations": [
+          {
+            "label": "Sorpresa EPS trimestrale",
+            "expression": "(((1.1)-(1))/(1))*100",
+            "unit": "%",
+            "basis": "EPS riportato e consenso trimestrile, confrontati nello stesso periodo."
+          },
+          {
+            "label": "Scostamento guidance annuale",
+            "expression": "(((4)-(5))/(5))*100",
+            "unit": "%",
+            "basis": "Guidance annuale e consenso sulla guidance, confrontati nello stesso periodo."
+          }
+        ]
+      },
+      "title": "Verifica dello scenario finanziario",
+      "summary": "L’EPS riportato è superiore del 10% al consenso trimestrale, mentre la guidance annuale è inferiore del 20% al consenso; sono confronti separati e non implicano che il prezzo debba salire.",
+      "interpretation": {
+        "domain": "trading",
+        "deadline": null,
+        "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+        "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+        "missing": []
+      },
+      "nodes": [
+        {
+          "id": "n0",
+          "kind": "thesis",
+          "label": "Caso sintetico: società pubblica EPS trimestrale GAAP di 1.10 contro consenso GAAP 1.00. Guidance EPS anno successivo scende a 4.00 contro consenso 5.00. Titolo -8% nel giorno dei risultati. Dico che il mercato si sbaglia perché EPS ha battuto le attese e il prezzo doveva salire. Non ci sono altri dati.",
+          "assumptions": [
+            "I numeri forniti descrivono lo scenario da analizzare."
+          ],
+          "challenge": "Il passaggio decisivo è verificare aspettative e periodo prima di interpretare ciascuna sorpresa.",
+          "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n1",
+          "kind": "consequence",
+          "label": "Sorpresa EPS trimestrale: 10 %",
+          "assumptions": [
+            "EPS riportato e consenso trimestrile, confrontati nello stesso periodo."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n2",
+          "kind": "consequence",
+          "label": "Scostamento guidance annuale: -20 %",
+          "assumptions": [
+            "Guidance annuale e consenso sulla guidance, confrontati nello stesso periodo."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n3",
+          "kind": "alternative",
+          "label": "La reazione del mercato diverge dalla sorpresa contabile",
+          "assumptions": [
+            "Il prezzo incorpora aspettative, outlook o informazioni ulteriori rispetto ai quattro valori EPS."
+          ],
+          "challenge": "Una sorpresa trimestrale positiva e una guidance annuale negativa possono avere effetti diversi e non deterministici.",
+          "falsifier": "Dati omogenei e revisione delle aspettative confermano la lettura separata dei due periodi.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "n0",
+          "to": "n1",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n2",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n3",
+          "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+        }
+      ],
+      "uncertainties": [
+        "Le percentuali descrivono sorprese omogenee per periodo; non collegano EPS e guidance di periodi diversi a una previsione causale sul prezzo."
+      ],
+      "trading": {
+        "instruments": [],
+        "catalysts": [],
+        "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+        "invalidation": "Confrontare i dati pubblicati con il consenso omogeneo e osservare la revisione delle aspettative future senza inferire il prezzo.",
+        "timingRisks": [],
+        "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+      }
+    },
+    "provenance": {
+      "provider": "openai-compatible",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "endpoint": "https://openrouter.ai/api/v1",
+      "local": false,
+      "promptVersion": "nesso-financial-kernel-v1",
+      "promptHash": "ecd3ceeddd071db41082f7168278bb4267a5598ad2b245d89f3e8d018cc1c126",
+      "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+      "generatedAt": "2026-09-19T10:40:40.398Z",
+      "durationMs": 19708,
+      "usage": {
+        "prompt_tokens": 1107,
+        "completion_tokens": 237,
+        "total_tokens": 1344,
+        "cost": 0.0002606634,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 128,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0.0002606634,
+          "upstream_inference_prompt_cost": 0.0001326834,
+          "upstream_inference_completions_cost": 0.00012798
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "stages": [
+        {
+          "provider": "openai-compatible",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "endpoint": "https://openrouter.ai/api/v1",
+          "local": false,
+          "promptVersion": "nesso-analysis-v4-financial",
+          "promptHash": "ecd3ceeddd071db41082f7168278bb4267a5598ad2b245d89f3e8d018cc1c126",
+          "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+          "generatedAt": "2026-09-19T10:40:40.398Z",
+          "durationMs": 19707,
+          "usage": {
+            "prompt_tokens": 1107,
+            "completion_tokens": 237,
+            "total_tokens": 1344,
+            "cost": 0.0002606634,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 128,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.0002606634,
+              "upstream_inference_prompt_cost": 0.0001326834,
+              "upstream_inference_completions_cost": 0.00012798
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ],
+      "calculationEngine": "deterministic-finance-v1",
+      "extractedScenario": {
+        "kind": "earnings",
+        "currency": "unità monetarie",
+        "values": {
+          "reportedEps": 1.1,
+          "consensusEps": 1,
+          "guidanceEps": 4,
+          "consensusGuidance": 5
+        },
+        "sources": {
+          "reportedEps": "EPS trimestrale GAAP di 1.10",
+          "consensusEps": "contro consenso GAAP 1.00",
+          "guidanceEps": "Guidance EPS anno successivo scende a 4.00",
+          "consensusGuidance": "contro consenso 5.00"
+        }
+      }
+    }
+  },
+  "validatedGraph": {
+    "focus": {
+      "claim": "Il confronto trimestrale è 10% e quello annuale è -20%, con periodi distinti.",
+      "why": "Il passaggio decisivo è verificare aspettative e periodo prima di interpretare ciascuna sorpresa.",
+      "assumption": "Reported EPS, consenso, guidance e consenso guidance hanno definizioni e perimetri omogenei nel rispettivo periodo.",
+      "test": "Confrontare i dati pubblicati con il consenso omogeneo e osservare la revisione delle aspettative future senza inferire il prezzo."
+    },
+    "financial": {
+      "conclusion": "L’EPS riportato è superiore del 10% al consenso trimestrale, mentre la guidance annuale è inferiore del 20% al consenso; sono confronti separati e non implicano che il prezzo debba salire.",
+      "limitation": "Le percentuali descrivono sorprese omogenee per periodo; non collegano EPS e guidance di periodi diversi a una previsione causale sul prezzo.",
+      "calculations": [
+        {
+          "label": "Sorpresa EPS trimestrale",
+          "expression": "(((1.1)-(1))/(1))*100",
+          "unit": "%",
+          "basis": "EPS riportato e consenso trimestrile, confrontati nello stesso periodo.",
+          "result": 10.000000000000009,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Scostamento guidance annuale",
+          "expression": "(((4)-(5))/(5))*100",
+          "unit": "%",
+          "basis": "Guidance annuale e consenso sulla guidance, confrontati nello stesso periodo.",
+          "result": -20,
+          "arithmeticValid": true
+        }
+      ]
+    },
+    "title": "Verifica dello scenario finanziario",
+    "summary": "L’EPS riportato è superiore del 10% al consenso trimestrale, mentre la guidance annuale è inferiore del 20% al consenso; sono confronti separati e non implicano che il prezzo debba salire.",
+    "interpretation": {
+      "domain": "trading",
+      "deadline": null,
+      "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+      "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+      "missing": []
+    },
+    "nodes": [
+      {
+        "id": "n0",
+        "label": "Caso sintetico: società pubblica EPS trimestrale GAAP di 1.10 contro consenso GAAP 1.00. Guidance EPS anno successivo scende a 4.00 contro consenso 5.00. Titolo -8% nel giorno dei risultati. Dico che il mercato si sbaglia perché EPS ha battuto le attese e il prezzo doveva salire. Non ci sono altri dati.",
+        "kind": "thesis",
+        "assumptions": [
+          "I numeri forniti descrivono lo scenario da analizzare."
+        ],
+        "challenge": "Il passaggio decisivo è verificare aspettative e periodo prima di interpretare ciascuna sorpresa.",
+        "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 0,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n1",
+        "label": "Sorpresa EPS trimestrale: 10 %",
+        "kind": "consequence",
+        "assumptions": [
+          "EPS riportato e consenso trimestrile, confrontati nello stesso periodo."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n2",
+        "label": "Scostamento guidance annuale: -20 %",
+        "kind": "consequence",
+        "assumptions": [
+          "Guidance annuale e consenso sulla guidance, confrontati nello stesso periodo."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n3",
+        "label": "La reazione del mercato diverge dalla sorpresa contabile",
+        "kind": "alternative",
+        "assumptions": [
+          "Il prezzo incorpora aspettative, outlook o informazioni ulteriori rispetto ai quattro valori EPS."
+        ],
+        "challenge": "Una sorpresa trimestrale positiva e una guidance annuale negativa possono avere effetti diversi e non deterministici.",
+        "falsifier": "Dati omogenei e revisione delle aspettative confermano la lettura separata dei due periodi.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      }
+    ],
+    "edges": [
+      {
+        "from": "n0",
+        "to": "n1",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n2",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n3",
+        "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+      }
+    ],
+    "uncertainties": [
+      "Le percentuali descrivono sorprese omogenee per periodo; non collegano EPS e guidance di periodi diversi a una previsione causale sul prezzo."
+    ],
+    "trading": {
+      "instruments": [],
+      "catalysts": [],
+      "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+      "invalidation": "Confrontare i dati pubblicati con il consenso omogeneo e osservare la revisione delle aspettative future senza inferire il prezzo.",
+      "timingRisks": [],
+      "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+    }
+  },
+  "structurallyValid": true,
+  "elapsedMs": 19708
+}

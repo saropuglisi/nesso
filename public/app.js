@@ -161,6 +161,16 @@ async function startLiveAnalysis(input) {
     edges = [];
   function event(frame) {
     if (frame.type === "error") throw new Error(frame.data.message);
+    if (frame.type === "stage") {
+      liveMessage = frame.data.message;
+      render();
+      return;
+    }
+    if (frame.type === "financial") {
+      analysis.body.graph.financial = frame.data;
+      if ($("#closeFocus")) inspectFocus();
+      return;
+    }
     if (frame.type === "focus") {
       const f = frame.data;
       if (
@@ -180,6 +190,7 @@ async function startLiveAnalysis(input) {
       complete = true;
       $("#liveBar").hidden = true;
       render();
+      if ($("#closeFocus")) inspectFocus();
       if (selected && analysis.body.graph.nodes.some((n) => n.id === selected))
         inspect(selected);
       return;
@@ -366,6 +377,22 @@ function render() {
   for (const el of existing.values()) el.remove();
   transform();
 }
+function financialDetail() {
+  const f = analysis?.body.graph.financial;
+  if (!f?.conclusion) return "";
+  const inputs = analysis?.body.provenance?.extractedScenario;
+  const evidence = inputs
+    ? `<h4>Dati estratti dal tuo testo</h4>${Object.entries(inputs.sources)
+        .map(
+          ([key, quote]) =>
+            `<p><strong>${escape(String(inputs.values[key]))}</strong> · «${escape(quote)}»</p>`,
+        )
+        .join(
+          "",
+        )}<p class="muted">Controlla l’interpretazione dei dati: il modello può ancora sbagliare l’estrazione.</p>`
+    : "";
+  return `${evidence}<h4>Che cosa segue dai numeri</h4><p>${escape(f.conclusion)}</p>${(f.calculations || []).map((c) => `<div class="callout"><strong>${escape(c.label)}</strong><p>${escape(c.expression)} = ${c.arithmeticValid ? escape(new Intl.NumberFormat("it-IT", { maximumSignificantDigits: 8 }).format(c.result)) + " " + escape(c.unit) : "calcolo non verificabile"}</p><small>${escape(c.basis)}</small></div>`).join("")}<p class="muted">L’aritmetica è calcolata dal software. La scelta della formula e le ipotesi restano da verificare.</p><h4>Limite della conclusione</h4><p>${escape(f.limitation)}</p>`;
+}
 function inspectFocus() {
   const f = analysis?.body.graph.focus;
   if (!f) return;
@@ -373,7 +400,7 @@ function inspectFocus() {
   render();
   $("#inspector").hidden = false;
   $("#inspector").innerHTML =
-    `<button class="close" id="closeFocus" aria-label="Chiudi dettaglio">×</button><span class="badge">Priorità di ricerca · non un verdetto</span><h3>${escape(f.claim)}</h3><h4>Perché questo passaggio</h4><p>${escape(f.why)}</p><h4>Che cosa stai assumendo</h4><p>${escape(f.assumption)}</p><h4>La verifica che conta</h4><p>${escape(f.test)}</p><p class="muted">Questo punto è proposto dal modello. Le evidenze devono ancora essere raccolte.</p>`;
+    `<button class="close" id="closeFocus" aria-label="Chiudi dettaglio">×</button><span class="badge">Priorità di ricerca · non un verdetto</span><h3>${escape(f.claim)}</h3><h4>Perché questo passaggio</h4><p>${escape(f.why)}</p><h4>Che cosa stai assumendo</h4><p>${escape(f.assumption)}</p><h4>La verifica che conta</h4><p>${escape(f.test)}</p><p class="muted">Conclusione condizionata ai dati estratti dal testo. Le evidenze devono ancora essere raccolte.</p>${financialDetail()}`;
   $("#closeFocus").onclick = () => {
     $("#inspector").hidden = true;
   };

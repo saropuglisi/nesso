@@ -2,7 +2,8 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { config, publicConfig, infer } from "./provider.js";
+import { config, publicConfig } from "./provider.js";
+import { analyze } from "./analysis.js";
 import {
   AppError,
   requireThat,
@@ -23,7 +24,7 @@ export function createApp({
       "nesso.sqlite",
     ),
   ),
-  inference = infer,
+  inference = analyze,
 } = {}) {
   let busy = false;
   const server = http.createServer(async (req, res) => {

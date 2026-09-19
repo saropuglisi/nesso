@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { calculate } from "./arithmetic.js";
 
 export const EFFORT = Object.freeze({
   low: { label: "Basso", depth: 2, nodes: 6, tokens: 5000 },
@@ -68,6 +69,15 @@ export const GRAPH_SCHEMA = object({
     assumption: str,
     test: str,
   }),
+  financial: object({
+    conclusion: str,
+    limitation: str,
+    calculations: {
+      type: "array",
+      maxItems: 3,
+      items: object({ label: str, expression: str, unit: str, basis: str }),
+    },
+  }),
   title: str,
   summary: str,
   interpretation: object({
@@ -116,6 +126,47 @@ export function validateFocus(value) {
     ]),
   );
 }
+export function validateFinancial(value) {
+  requireThat(
+    value && typeof value === "object",
+    "Analisi finanziaria mancante.",
+    422,
+  );
+  for (const k of ["conclusion", "limitation"])
+    requireThat(
+      typeof value[k] === "string" && value[k].length <= 1600,
+      "Sintesi finanziaria non valida.",
+      422,
+    );
+  requireThat(
+    Array.isArray(value.calculations) && value.calculations.length <= 3,
+    "Calcoli finanziari non validi.",
+    422,
+  );
+  const calculations = value.calculations.map((c) => {
+    requireThat(c && typeof c === "object", "Calcolo non valido.", 422);
+    const clean = {
+      label: text(c.label, "Calcolo", 300),
+      expression: text(c.expression, "Espressione", 500),
+      unit: text(c.unit, "Unità", 100),
+      basis: text(c.basis, "Base del calcolo", 1600),
+    };
+    try {
+      return {
+        ...clean,
+        result: calculate(clean.expression),
+        arithmeticValid: true,
+      };
+    } catch {
+      return { ...clean, result: null, arithmeticValid: false };
+    }
+  });
+  return {
+    conclusion: value.conclusion,
+    limitation: value.limitation,
+    calculations,
+  };
+}
 export function validateGraph(g, effort) {
   requireThat(
     g && typeof g === "object",
@@ -125,6 +176,7 @@ export function validateGraph(g, effort) {
   text(g.title, "Titolo", 500);
   text(g.summary, "Sintesi", 4000);
   const focus = validateFocus(g.focus);
+  const financial = validateFinancial(g.financial);
   requireThat(
     Array.isArray(g.nodes) &&
       g.nodes.length >= 3 &&
@@ -255,6 +307,7 @@ export function validateGraph(g, effort) {
     );
   return {
     focus,
+    financial,
     title: g.title,
     summary: g.summary,
     interpretation: {

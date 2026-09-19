@@ -1,0 +1,290 @@
+[
+  {
+    "experiment": "eval-baseline",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Arco con riferimento non valido.",
+    "elapsedMs": 52979,
+    "cost": 0.0008748
+  },
+  {
+    "experiment": "eval-baseline-other",
+    "case": "earnings",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 59391,
+    "cost": 0.000794205
+  },
+  {
+    "experiment": "eval-baseline-other",
+    "case": "marketplace",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Arco con riferimento non valido.",
+    "elapsedMs": 76081,
+    "cost": 0.000967275
+  },
+  {
+    "experiment": "eval-baseline-other",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Arco con riferimento non valido.",
+    "elapsedMs": 89333,
+    "cost": 0.001071225
+  },
+  {
+    "experiment": "eval-financial",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Nodo scollegato dalla tesi.",
+    "elapsedMs": 91531,
+    "cost": 0.001426545
+  },
+  {
+    "experiment": "eval-workflow",
+    "case": "earnings",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 102113,
+    "cost": 0.001566405
+  },
+  {
+    "experiment": "eval-workflow",
+    "case": "marketplace",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 79561,
+    "cost": 0.001341225
+  },
+  {
+    "experiment": "eval-workflow",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 95097,
+    "cost": 0.00148635
+  },
+  {
+    "experiment": "eval-workflow",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 89814,
+    "cost": 0.0012110526
+  },
+  {
+    "experiment": "eval-alternative",
+    "case": "pricing",
+    "model": "openai/gpt-5.4-mini",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 12108,
+    "cost": 0.00983475
+  },
+  {
+    "experiment": "eval-alternative-other",
+    "case": "earnings",
+    "model": "openai/gpt-5.4-mini",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 13538,
+    "cost": 0.00871725
+  },
+  {
+    "experiment": "eval-alternative-other",
+    "case": "marketplace",
+    "model": "openai/gpt-5.4-mini",
+    "structurallyValid": false,
+    "error": "Servono una tesi e almeno uno scenario alternativo.",
+    "elapsedMs": 10973,
+    "cost": 0.00867
+  },
+  {
+    "experiment": "eval-alternative-other",
+    "case": "duration",
+    "model": "openai/gpt-5.4-mini",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 13878,
+    "cost": 0.01041225
+  },
+  {
+    "experiment": "eval-sonnet",
+    "case": "pricing",
+    "model": "anthropic/claude-sonnet-4.6",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 58712,
+    "cost": 0.044766
+  },
+  {
+    "experiment": "eval-sonnet-other",
+    "case": "earnings",
+    "model": "anthropic/claude-sonnet-4.6",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 54178,
+    "cost": 0.050652
+  },
+  {
+    "experiment": "eval-sonnet-other",
+    "case": "marketplace",
+    "model": "anthropic/claude-sonnet-4.6",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 40318,
+    "cost": 0.041547
+  },
+  {
+    "experiment": "eval-sonnet-other",
+    "case": "duration",
+    "model": "anthropic/claude-sonnet-4.6",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 52266,
+    "cost": 0.051807
+  },
+  {
+    "experiment": "eval-kernel",
+    "case": "earnings",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 23760,
+    "cost": 0.00038205
+  },
+  {
+    "experiment": "eval-kernel",
+    "case": "marketplace",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Il provider ha rifiutato la richiesta (HTTP 429). Controlla modello, credenziali e supporto JSON Schema.",
+    "elapsedMs": 1704,
+    "cost": null
+  },
+  {
+    "experiment": "eval-kernel",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Valuta non valida.",
+    "elapsedMs": 32328,
+    "cost": null
+  },
+  {
+    "experiment": "eval-kernel",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Un dato estratto non corrisponde al testo fornito.",
+    "elapsedMs": 21830,
+    "cost": null
+  },
+  {
+    "experiment": "eval-kernel-final",
+    "case": "earnings",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 64943,
+    "cost": 0.000441315
+  },
+  {
+    "experiment": "eval-kernel-final",
+    "case": "marketplace",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 22520,
+    "cost": 0.000390825
+  },
+  {
+    "experiment": "eval-kernel-final",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Valuta non valida.",
+    "elapsedMs": 38773,
+    "cost": 0.00044955
+  },
+  {
+    "experiment": "eval-kernel-final",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 40324,
+    "cost": 0.0003207438
+  },
+  {
+    "experiment": "eval-kernel-v3",
+    "case": "earnings",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 19708,
+    "cost": 0.0002606634
+  },
+  {
+    "experiment": "eval-kernel-v3",
+    "case": "marketplace",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 12499,
+    "cost": 0.000267435
+  },
+  {
+    "experiment": "eval-kernel-v3",
+    "case": "pricing",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 30247,
+    "cost": 0.000432
+  },
+  {
+    "experiment": "eval-kernel-v3",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 72236,
+    "cost": 0.000324945
+  },
+  {
+    "experiment": "eval-yield-evidence",
+    "case": "duration",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 25694,
+    "cost": 0.00028539
+  },
+  {
+    "experiment": "eval-qualitative",
+    "case": "qualitative",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": false,
+    "error": "Il primo nodo wire deve essere l\u2019unica radice thesis con parentIndex null.",
+    "elapsedMs": 108915,
+    "cost": null
+  },
+  {
+    "experiment": "eval-qualitative-final",
+    "case": "qualitative",
+    "model": "deepseek/deepseek-v4.1-flash",
+    "structurallyValid": true,
+    "error": null,
+    "elapsedMs": 98273,
+    "cost": 0.001419255
+  }
+]

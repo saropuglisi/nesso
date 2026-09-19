@@ -1,4 +1,9 @@
-import { AppError, requireThat, validateFocus } from "./domain.js";
+import {
+  AppError,
+  requireThat,
+  validateFocus,
+  validateFinancial,
+} from "./domain.js";
 
 // Emit only complete JSON objects in the top-level nodes and edges arrays.
 // Strings (including escaped quotes/braces) never affect nesting.
@@ -40,8 +45,10 @@ export function graphIncremental(onItem) {
           item:
             c === "{"
               ? stack.length === 1 &&
-                /"focus"\s*:\s*$/.test(source.slice(0, offset))
-                ? "focus"
+                /"(focus|financial)"\s*:\s*$/.test(source.slice(0, offset))
+                ? source
+                    .slice(0, offset)
+                    .match(/"(focus|financial)"\s*:\s*$/)[1]
                 : parent?.key
               : undefined,
         });
@@ -51,12 +58,16 @@ export function graphIncremental(onItem) {
           try {
             const value = JSON.parse(source.slice(entry.start, offset + 1));
             onItem(
-              entry.item === "focus"
-                ? "focus"
+              ["focus", "financial"].includes(entry.item)
+                ? entry.item
                 : entry.item === "nodes"
                   ? "node"
                   : "edge",
-              entry.item === "focus" ? validateFocus(value) : value,
+              entry.item === "focus"
+                ? validateFocus(value)
+                : entry.item === "financial"
+                  ? validateFinancial(value)
+                  : value,
             );
           } catch (e) {
             if (e instanceof SyntaxError)

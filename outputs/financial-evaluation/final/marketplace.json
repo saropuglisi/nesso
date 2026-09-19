@@ -1,0 +1,366 @@
+{
+  "id": "marketplace",
+  "model": "deepseek/deepseek-v4.1-flash",
+  "input": {
+    "thesis": "Scenario sintetico: 100 milioni di euro di acquisti migrano su una piattaforma. Il 70% è marketplace con commissione del 15% contabilizzata come ricavo netto, il 30% vendita diretta contabilizzata al lordo. Nessun altro ricavo o effetto. Dico che i ricavi aumenteranno di 100 milioni. Valuta e quantifica.",
+    "effort": "low",
+    "domain": null,
+    "deadline": null,
+    "referenceDate": "2026-09-19",
+    "context": ""
+  },
+  "expected": [
+    "40.5 milioni ricavi, non100",
+    "10.5 marketplace +30diretto",
+    "nessuna deduzione su profitto o titolo"
+  ],
+  "response": {
+    "graph": {
+      "focus": {
+        "claim": "Il ricavo riconosciuto nello scenario è 40.500.000 EUR su 100.000.000 EUR di GMV.",
+        "why": "Il passaggio decisivo è separare il valore intermediato dal ricavo che la piattaforma può contabilizzare.",
+        "assumption": "La quota marketplace genera solo la commissione indicata e la quota diretta è contabilizzata al lordo.",
+        "test": "Confrontare GMV, mix marketplace-diretto, commissioni e ricavi contabilizzati nello stesso periodo."
+      },
+      "financial": {
+        "conclusion": "Su 100.000.000 EUR di GMV, 70.000.000 EUR passano dal marketplace e generano 10.500.000 EUR di commissioni; 30.000.000 EUR di vendite dirette portano il ricavo riconosciuto totale a 40.500.000 EUR. Il GMV non equivale automaticamente al ricavo.",
+        "limitation": "Il calcolo distingue GMV e ricavo contabilizzato, ma non stima costi, profitti, resi, imposte, cancellazioni o effetti di domanda.",
+        "calculations": [
+          {
+            "label": "Ricavo marketplace da commissione",
+            "expression": "(100000000)*(70)/100*(15)/100",
+            "unit": "EUR",
+            "basis": "GMV marketplace e commissione forniti nello scenario."
+          },
+          {
+            "label": "Ricavo da vendite dirette",
+            "expression": "(100000000)*(100-(70))/100",
+            "unit": "EUR",
+            "basis": "Quota non marketplace trattata come vendita diretta contabilizzata al lordo."
+          },
+          {
+            "label": "Ricavo riconosciuto totale",
+            "expression": "(100000000)*(70)/100*(15)/100+(100000000)*(100-(70))/100",
+            "unit": "EUR",
+            "basis": "Somma del ricavo marketplace e del ricavo diretto; GMV e ricavo restano misure diverse."
+          }
+        ]
+      },
+      "title": "Verifica dello scenario finanziario",
+      "summary": "Su 100.000.000 EUR di GMV, 70.000.000 EUR passano dal marketplace e generano 10.500.000 EUR di commissioni; 30.000.000 EUR di vendite dirette portano il ricavo riconosciuto totale a 40.500.000 EUR. Il GMV non equivale automaticamente al ricavo.",
+      "interpretation": {
+        "domain": "general",
+        "deadline": null,
+        "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+        "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+        "missing": []
+      },
+      "nodes": [
+        {
+          "id": "n0",
+          "kind": "thesis",
+          "label": "Scenario sintetico: 100 milioni di euro di acquisti migrano su una piattaforma. Il 70% è marketplace con commissione del 15% contabilizzata come ricavo netto, il 30% vendita diretta contabilizzata al lordo. Nessun altro ricavo o effetto. Dico che i ricavi aumenteranno di 100 milioni. Valuta e quantifica.",
+          "assumptions": [
+            "I numeri forniti descrivono lo scenario da analizzare."
+          ],
+          "challenge": "Il passaggio decisivo è separare il valore intermediato dal ricavo che la piattaforma può contabilizzare.",
+          "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n1",
+          "kind": "consequence",
+          "label": "Ricavo marketplace da commissione: 10.500.000 EUR",
+          "assumptions": [
+            "GMV marketplace e commissione forniti nello scenario."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n2",
+          "kind": "consequence",
+          "label": "Ricavo da vendite dirette: 30.000.000 EUR",
+          "assumptions": [
+            "Quota non marketplace trattata come vendita diretta contabilizzata al lordo."
+          ],
+          "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+          "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        },
+        {
+          "id": "n3",
+          "kind": "alternative",
+          "label": "Il mix o la contabilizzazione differiscono dallo scenario",
+          "assumptions": [
+            "Quote, commissione, resi o criterio contabile differiscono dai valori forniti."
+          ],
+          "challenge": "Lo stesso GMV può produrre ricavi diversi quando cambia il mix o il perimetro contabile.",
+          "falsifier": "Registri coerenti confermano quote, commissione e metodo di riconoscimento del ricavo.",
+          "evidenceNeeded": [
+            "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "from": "n0",
+          "to": "n1",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n2",
+          "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+        },
+        {
+          "from": "n0",
+          "to": "n3",
+          "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+        }
+      ],
+      "uncertainties": [
+        "Il calcolo distingue GMV e ricavo contabilizzato, ma non stima costi, profitti, resi, imposte, cancellazioni o effetti di domanda."
+      ],
+      "trading": {
+        "instruments": [],
+        "catalysts": [],
+        "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+        "invalidation": "Confrontare GMV, mix marketplace-diretto, commissioni e ricavi contabilizzati nello stesso periodo.",
+        "timingRisks": [],
+        "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+      }
+    },
+    "provenance": {
+      "provider": "openai-compatible",
+      "model": "deepseek/deepseek-v4.1-flash",
+      "endpoint": "https://openrouter.ai/api/v1",
+      "local": false,
+      "promptVersion": "nesso-financial-kernel-v1",
+      "promptHash": "960c6bfe76da5e4b520707b6b31632cd9519ac38075a03fc2f04230ebd9840ba",
+      "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+      "generatedAt": "2026-09-19T10:40:20.687Z",
+      "durationMs": 12498,
+      "usage": {
+        "prompt_tokens": 1101,
+        "completion_tokens": 220,
+        "total_tokens": 1321,
+        "cost": 0.000267435,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "cache_write_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": 0.000267435,
+          "upstream_inference_prompt_cost": 0.000148635,
+          "upstream_inference_completions_cost": 0.0001188
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0,
+          "audio_tokens": 0
+        }
+      },
+      "stages": [
+        {
+          "provider": "openai-compatible",
+          "model": "deepseek/deepseek-v4.1-flash",
+          "endpoint": "https://openrouter.ai/api/v1",
+          "local": false,
+          "promptVersion": "nesso-analysis-v4-financial",
+          "promptHash": "960c6bfe76da5e4b520707b6b31632cd9519ac38075a03fc2f04230ebd9840ba",
+          "schemaHash": "3163bbb9b61880d46093e1b783b6dfe1e1f3e34ac3f4e57d72fa24f0430fc2f1",
+          "generatedAt": "2026-09-19T10:40:20.687Z",
+          "durationMs": 12497,
+          "usage": {
+            "prompt_tokens": 1101,
+            "completion_tokens": 220,
+            "total_tokens": 1321,
+            "cost": 0.000267435,
+            "is_byok": false,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "cache_write_tokens": 0,
+              "audio_tokens": 0,
+              "video_tokens": 0
+            },
+            "cost_details": {
+              "upstream_inference_cost": 0.000267435,
+              "upstream_inference_prompt_cost": 0.000148635,
+              "upstream_inference_completions_cost": 0.0001188
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "image_tokens": 0,
+              "audio_tokens": 0
+            }
+          }
+        }
+      ],
+      "calculationEngine": "deterministic-finance-v1",
+      "extractedScenario": {
+        "kind": "marketplace",
+        "currency": "EUR",
+        "values": {
+          "gmv": 100000000,
+          "marketplacePercent": 70,
+          "commissionPercent": 15
+        },
+        "sources": {
+          "gmv": "100 milioni di euro di acquisti migrano su una piattaforma",
+          "marketplacePercent": "Il 70% è marketplace",
+          "commissionPercent": "con commissione del 15% contabilizzata come ricavo netto"
+        }
+      }
+    }
+  },
+  "validatedGraph": {
+    "focus": {
+      "claim": "Il ricavo riconosciuto nello scenario è 40.500.000 EUR su 100.000.000 EUR di GMV.",
+      "why": "Il passaggio decisivo è separare il valore intermediato dal ricavo che la piattaforma può contabilizzare.",
+      "assumption": "La quota marketplace genera solo la commissione indicata e la quota diretta è contabilizzata al lordo.",
+      "test": "Confrontare GMV, mix marketplace-diretto, commissioni e ricavi contabilizzati nello stesso periodo."
+    },
+    "financial": {
+      "conclusion": "Su 100.000.000 EUR di GMV, 70.000.000 EUR passano dal marketplace e generano 10.500.000 EUR di commissioni; 30.000.000 EUR di vendite dirette portano il ricavo riconosciuto totale a 40.500.000 EUR. Il GMV non equivale automaticamente al ricavo.",
+      "limitation": "Il calcolo distingue GMV e ricavo contabilizzato, ma non stima costi, profitti, resi, imposte, cancellazioni o effetti di domanda.",
+      "calculations": [
+        {
+          "label": "Ricavo marketplace da commissione",
+          "expression": "(100000000)*(70)/100*(15)/100",
+          "unit": "EUR",
+          "basis": "GMV marketplace e commissione forniti nello scenario.",
+          "result": 10500000,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Ricavo da vendite dirette",
+          "expression": "(100000000)*(100-(70))/100",
+          "unit": "EUR",
+          "basis": "Quota non marketplace trattata come vendita diretta contabilizzata al lordo.",
+          "result": 30000000,
+          "arithmeticValid": true
+        },
+        {
+          "label": "Ricavo riconosciuto totale",
+          "expression": "(100000000)*(70)/100*(15)/100+(100000000)*(100-(70))/100",
+          "unit": "EUR",
+          "basis": "Somma del ricavo marketplace e del ricavo diretto; GMV e ricavo restano misure diverse.",
+          "result": 40500000,
+          "arithmeticValid": true
+        }
+      ]
+    },
+    "title": "Verifica dello scenario finanziario",
+    "summary": "Su 100.000.000 EUR di GMV, 70.000.000 EUR passano dal marketplace e generano 10.500.000 EUR di commissioni; 30.000.000 EUR di vendite dirette portano il ricavo riconosciuto totale a 40.500.000 EUR. Il GMV non equivale automaticamente al ricavo.",
+    "interpretation": {
+      "domain": "general",
+      "deadline": null,
+      "horizon": "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
+      "context": "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+      "missing": []
+    },
+    "nodes": [
+      {
+        "id": "n0",
+        "label": "Scenario sintetico: 100 milioni di euro di acquisti migrano su una piattaforma. Il 70% è marketplace con commissione del 15% contabilizzata come ricavo netto, il 30% vendita diretta contabilizzata al lordo. Nessun altro ricavo o effetto. Dico che i ricavi aumenteranno di 100 milioni. Valuta e quantifica.",
+        "kind": "thesis",
+        "assumptions": [
+          "I numeri forniti descrivono lo scenario da analizzare."
+        ],
+        "challenge": "Il passaggio decisivo è separare il valore intermediato dal ricavo che la piattaforma può contabilizzare.",
+        "falsifier": "La conclusione non segue dai dati o dalle condizioni dichiarate.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 0,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n1",
+        "label": "Ricavo marketplace da commissione: 10.500.000 EUR",
+        "kind": "consequence",
+        "assumptions": [
+          "GMV marketplace e commissione forniti nello scenario."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n2",
+        "label": "Ricavo da vendite dirette: 30.000.000 EUR",
+        "kind": "consequence",
+        "assumptions": [
+          "Quota non marketplace trattata come vendita diretta contabilizzata al lordo."
+        ],
+        "challenge": "Questo calcolo vale alle condizioni dichiarate, non dimostra che lo scenario si realizzerà.",
+        "falsifier": "Dati di ingresso o condizioni della formula diversi da quelli dichiarati.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      },
+      {
+        "id": "n3",
+        "label": "Il mix o la contabilizzazione differiscono dallo scenario",
+        "kind": "alternative",
+        "assumptions": [
+          "Quote, commissione, resi o criterio contabile differiscono dai valori forniti."
+        ],
+        "challenge": "Lo stesso GMV può produrre ricavi diversi quando cambia il mix o il perimetro contabile.",
+        "falsifier": "Registri coerenti confermano quote, commissione e metodo di riconoscimento del ricavo.",
+        "evidenceNeeded": [
+          "Verificare che i dati dello scenario corrispondano a misure osservate, nello stesso periodo e perimetro."
+        ],
+        "depth": 1,
+        "evidenceStatus": "unverified"
+      }
+    ],
+    "edges": [
+      {
+        "from": "n0",
+        "to": "n1",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n2",
+        "mechanism": "Applicazione delle formule dello scenario ai dati forniti."
+      },
+      {
+        "from": "n0",
+        "to": "n3",
+        "mechanism": "Questa condizione cambia la validità della conclusione dello scenario."
+      }
+    ],
+    "uncertainties": [
+      "Il calcolo distingue GMV e ricavo contabilizzato, ma non stima costi, profitti, resi, imposte, cancellazioni o effetti di domanda."
+    ],
+    "trading": {
+      "instruments": [],
+      "catalysts": [],
+      "pricedIn": "Non sono disponibili dati sulle aspettative incorporate nel prezzo.",
+      "invalidation": "Confrontare GMV, mix marketplace-diretto, commissioni e ricavi contabilizzati nello stesso periodo.",
+      "timingRisks": [],
+      "marketVsThesis": "Un risultato contabile o matematico non dimostra un rendimento di mercato."
+    }
+  },
+  "structurallyValid": true,
+  "elapsedMs": 12499
+}

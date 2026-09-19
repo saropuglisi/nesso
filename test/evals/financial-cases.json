@@ -1,0 +1,43 @@
+{
+  "description": "Dati sintetici. Esecuzione manuale API a pagamento, non parte di npm test.",
+  "cases": [
+    {
+      "id": "pricing",
+      "thesis": "Caso sintetico, non dati reali: vendo 1000 unità al mese a 100 euro, costo variabile 60 euro per unità e costi fissi 20000 euro al mese. Voglio tagliare il prezzo del 20% e prevedo di vendere 1300 unità al mese. Sostengo che così aumenteranno sia ricavi sia profitto operativo. Verifica la tesi assumendo costi unitari e fissi invariati.",
+      "assertions": [
+        "ricavi 100000 ->104000",
+        "profitto 20000 ->6000",
+        "ricavi +4%, profitto -70%",
+        "2000 unità per mantenere profitto precedente"
+      ]
+    },
+    {
+      "id": "marketplace",
+      "thesis": "Scenario sintetico: 100 milioni di euro di acquisti migrano su una piattaforma. Il 70% è marketplace con commissione del 15% contabilizzata come ricavo netto, il 30% vendita diretta contabilizzata al lordo. Nessun altro ricavo o effetto. Dico che i ricavi aumenteranno di 100 milioni. Valuta e quantifica.",
+      "assertions": [
+        "40.5 milioni ricavi, non100",
+        "10.5 marketplace +30diretto",
+        "nessuna deduzione su profitto o titolo"
+      ]
+    },
+    {
+      "id": "earnings",
+      "thesis": "Caso sintetico: società pubblica EPS trimestrale GAAP di 1.10 contro consenso GAAP 1.00. Guidance EPS anno successivo scende a 4.00 contro consenso 5.00. Titolo -8% nel giorno dei risultati. Dico che il mercato si sbaglia perché EPS ha battuto le attese e il prezzo doveva salire. Non ci sono altri dati.",
+      "assertions": [
+        "beat10%, guidance20% sotto consenso",
+        "non dedurre causalità certa della discesa",
+        "non affermare sottovalutazione o rialzo necessario"
+      ]
+    },
+    {
+      "id": "duration",
+      "thesis": "Caso sintetico: obbligazione senza opzioni, duration modificata 7, prezzo100. La banca centrale taglia il tasso ufficiale di 50 punti base. Dico che il prezzo deve salire esattamente al103.5. Valuta separando il caso in cui il rendimento richiesto di questa obbligazione scende anch esso di50bp dal caso in cui non cambia. Ignora cedola nel periodo, spread costanti, ma non assumere che convessità sia zero.",
+      "assertions": [
+        "+3.5% solo approssimazione se yield-50bp",
+        "tasso ufficiale non necessariamente yield",
+        "convessità impedisce esattamente103.5",
+        "se yield invariato nessun effetto prezzo da duration"
+      ]
+    }
+  ]
+}

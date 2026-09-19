@@ -24,6 +24,7 @@ export function graph() {
         "Il carico resta sostenibile anche con meno giorni di lavoro.",
       test: "Confrontare retention e carico di lavoro con un gruppo simile nello stesso periodo; nessun miglioramento indebolirebbe il nesso.",
     },
+    financial: { conclusion: "", limitation: "", calculations: [] },
     title: "Settimana breve e retention",
     summary: "Un’ipotesi da verificare con un gruppo di confronto.",
     interpretation: {

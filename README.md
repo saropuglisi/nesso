@@ -96,3 +96,19 @@ I test usano provider HTTP simulati e database temporanei. Non consumano API a p
 - `docs/roadmap.md`: passaggi successivi.
 
 Riferimenti implementativi: [OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [Ollama Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs), [LM Studio Structured Output](https://lmstudio.ai/docs/developer/openai-compat/structured-output).
+
+## Verifiche finanziarie e prove sui modelli
+
+L’analisi ora separa estrazione dei dati, calcoli e costruzione del ragionamento. Quattro famiglie con dati completi (prezzo/volumi/costi, marketplace, EPS e guidance, duration obbligazionaria) usano formule e conclusioni nel codice. I valori estratti conservano citazioni del testo, visibili nel dettaglio e nella provenienza. La corrispondenza numerica non garantisce che il modello abbia interpretato correttamente periodo, segno o significato: controllare gli input resta necessario.
+
+Per tesi diverse o senza numeri rimane una pipeline generale in due passaggi, con controlli finanziari su materialità, aspettative e causalità. Le formule generate vengono eseguite da un parser aritmetico senza `eval`; questo verifica il conto, non la correttezza economica della formula. Gli archi sono costruiti da genitori dichiarati e validati, evitando ID arbitrari inesistenti. Il budget effort vale per l’espansione generale; un calcolo supportato non viene allungato artificialmente all’aumentare dell’effort.
+
+Il revisore sperimentale in `server/review.js` **non è usato dal percorso applicativo**: nelle prove ha introdotto errori semantici. Non è stato cambiato il modello configurato in `.env`.
+
+Prove API esplicite, potenzialmente a pagamento, su quattro casi sintetici:
+
+```sh
+node --env-file=.env scripts/evaluate-finance.mjs test/evals/financial-cases.json work/evaluation
+```
+
+Il comando registra risposte, errori, latenza e costi comunicati dal provider. Non è un benchmark indipendente: sono casi di sviluppo con risultati attesi, non una validazione su mercati reali. Per il resoconto vedere `outputs/VERIFICA-FINANZIARIA.md`.
