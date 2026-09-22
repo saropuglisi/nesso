@@ -8,6 +8,15 @@ import {
 } from "../server/domain.js";
 import { graph, input, criterion } from "./fixtures.js";
 
+test("context is preserved verbatim and never silently truncated", () => {
+  const context = " " + "x".repeat(11998) + " ";
+  assert.equal(inputSpec({ ...input, context }).context, context);
+  assert.throws(
+    () => inputSpec({ ...input, context: context + "x" }),
+    /non viene tagliato automaticamente/,
+  );
+});
+
 test("text-only input leaves missing horizon unset and preserves derived interpretation", () => {
   const request = inputSpec({ thesis: input.thesis, effort: "low" });
   assert.equal(request.domain, null);

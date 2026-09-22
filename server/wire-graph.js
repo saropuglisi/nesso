@@ -1,4 +1,4 @@
-import { AppError, GRAPH_SCHEMA, requireThat } from "./domain.js";
+import { AppError, GRAPH_SCHEMA, RELATIONS, requireThat } from "./domain.js";
 
 function clone(value) {
   try {
@@ -32,6 +32,8 @@ function assertNode(node, index) {
 
 function validateWireNode(node, index) {
   assertNode(node, index);
+  if (Object.hasOwn(node, "relation"))
+    requireThat(index === 0 ? node.relation === null : RELATIONS.includes(node.relation), "Relazione wire non valida.", 422);
   if (index === 0) {
     requireThat(
       node.kind === "thesis" && node.parentIndex === null,
@@ -49,7 +51,7 @@ function validateWireNode(node, index) {
     Number.isInteger(node.parentIndex) &&
       node.parentIndex >= 0 &&
       node.parentIndex < index,
-    `parentIndex non valido per il nodo wire ${index}.`,
+    `parentIndex non valido per il nodo wire ${index}: deve essere un intero tra 0 e ${index - 1}, cioè la posizione di un nodo già scritto; non il livello e non il nodo stesso.`,
     422,
   );
   requireThat(
@@ -64,6 +66,7 @@ function canonicalNode(node, index) {
     id: _id,
     parentIndex: _parentIndex,
     mechanism: _mechanism,
+    relation: _relation,
     ...rest
   } = node;
   return { id: `n${index}`, ...rest };
@@ -91,14 +94,19 @@ export function wireSchema(schema = GRAPH_SCHEMA) {
   if (!nodeSchema.properties || typeof nodeSchema.properties !== "object")
     invalid("Schema wire dei nodi non valido.");
   delete nodeSchema.properties.id;
-  nodeSchema.properties.parentIndex = { type: ["integer", "null"] };
+  nodeSchema.properties.parentIndex = {
+    type: ["integer", "null"],
+    minimum: 0,
+    description: "Posizione del genitore nell’array nodes, contando da zero, NON profondità. Solo la radice usa null; ogni figlio indica un nodo già scritto. Il nodo in posizione 1 può usare solo 0; quello in posizione 2 può usare 0 o 1, mai 2.",
+  };
   nodeSchema.properties.mechanism = { type: "string" };
+  nodeSchema.properties.relation = { type: ["string", "null"], enum: [...RELATIONS, null] };
   const required = Array.isArray(nodeSchema.required)
     ? nodeSchema.required.filter(
         (key) => key !== "id" && key !== "parentIndex" && key !== "mechanism",
       )
     : [];
-  nodeSchema.required = [...required, "parentIndex", "mechanism"];
+  nodeSchema.required = [...new Set([...required, "parentIndex", "mechanism", "relation"])];
   return result;
 }
 
@@ -128,6 +136,7 @@ export function compileWire(raw) {
     from: `n${node.parentIndex}`,
     to: `n${index + 1}`,
     mechanism: node.mechanism,
+    ...(node.relation ? { relation: node.relation } : {}),
   }));
   result.nodes = nodes;
   result.edges = edges;
@@ -151,6 +160,7 @@ export function wireProgress(onProgress) {
         from: `n${data.parentIndex}`,
         to: `n${index}`,
         mechanism: data.mechanism,
+        ...(data.relation ? { relation: data.relation } : {}),
       });
   };
 }

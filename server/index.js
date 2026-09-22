@@ -4,6 +4,11 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { config, publicConfig } from "./provider.js";
 import { analyze } from "./analysis.js";
+import { critique } from "./thesis-dialogue.js";
+import { research, RESEARCH_TIMEOUT_MS } from "./research.js";
+import { dataConfig, sourceStatus } from "./data-sources.js";
+import { buildCharts } from "./chart-data.js";
+import { buildEvidenceAudit } from "./evidence-audit.js";
 import {
   AppError,
   requireThat,
@@ -25,6 +30,9 @@ export function createApp({
     ),
   ),
   inference = analyze,
+  dialogue = critique,
+  researcher = research,
+  sourcesConfig = dataConfig(),
 } = {}) {
   let busy = false;
   const server = http.createServer(async (req, res) => {
@@ -60,9 +68,15 @@ export function createApp({
       );
       const path = new URL(req.url, `http://${req.headers.host}`).pathname;
       if (req.method === "GET" && path === "/api/config")
-        return send(200, publicConfig(provider));
+        return send(200, {
+          ...publicConfig(provider),
+          dataSources: sourceStatus(sourcesConfig),
+          researchTimeoutMs: RESEARCH_TIMEOUT_MS,
+          features: { charts: true, reasoning: true, evidenceAudit: true },
+        });
       if (req.method === "GET" && path === "/api/journal")
         return send(200, {
+          analyses: store.list("analysis"),
           snapshots: store.list(),
           evaluations: store.list("evaluation"),
         });
@@ -91,6 +105,22 @@ export function createApp({
           body && typeof body === "object" && !Array.isArray(body),
           "La richiesta deve essere un oggetto.",
         );
+        if (path === "/api/critique") {
+          requireThat(!busy, "Un’analisi è già in corso. Attendi il completamento.", 429);
+          const input = inputSpec(body);
+          const controller = new AbortController();
+          res.on("close", () => {
+            if (!res.writableEnded) controller.abort();
+          });
+          busy = true;
+          try {
+            const result = await dialogue(provider, input, controller.signal);
+            if (!controller.signal.aborted) return send(200, result);
+            return;
+          } finally {
+            busy = false;
+          }
+        }
         if (path === "/api/analyze" || path === "/api/analyze/stream") {
           requireThat(
             !busy,
@@ -118,20 +148,33 @@ export function createApp({
             if (!res.writableEnded) controller.abort();
           });
           try {
+            const evidence = input.research
+              ? await researcher(provider, input, controller.signal, streaming ? emit : undefined, { config: sourcesConfig })
+              : null;
             const result = await inference(
               provider,
-              input,
+              evidence ? { ...input, evidence } : input,
               controller.signal,
               undefined,
               streaming ? emit : undefined,
             );
             if (controller.signal.aborted) return;
             const graph = validateGraph(result.graph, input.effort);
+            // The dossier is separately validated by deepen(), never accepted
+            // from the client or asked for again in the graph JSON schema.
+            if (result.reasoning) graph.reasoning = result.reasoning;
+            const charts = buildCharts(evidence);
+            // Presence/absence of retrieved material is deterministic; this is
+            // not a truth score and must never come from the model or client.
+            const evidenceAudit = buildEvidenceAudit({ graph, evidence, charts });
             const record = store.add("analysis", {
               schemaVersion: "nesso.analysis.v1",
               input,
               graph,
               provenance: result.provenance,
+              charts,
+              evidenceAudit,
+              ...(evidence ? { research: evidence } : {}),
             });
             if (streaming) {
               emit("complete", record);
@@ -230,6 +273,7 @@ export function createApp({
       const assets = {
         "/": ["public/index.html", "text/html"],
         "/app.js": ["public/app.js", "text/javascript"],
+        "/charts.js": ["public/charts.js", "text/javascript"],
         "/style.css": ["public/style.css", "text/css"],
       };
       requireThat(Object.hasOwn(assets, path), "Risorsa non trovata.", 404);

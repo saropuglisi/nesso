@@ -72,6 +72,9 @@ export function graphIncremental(onItem) {
           } catch (e) {
             if (e instanceof SyntaxError)
               throw new AppError("JSON parziale non valido.", 422);
+            // Shared field validators use 400 for bad user input; here their
+            // input is model output, so this is a repairable generation error.
+            if (e instanceof AppError && e.status === 400) e.status = 422;
             throw e;
           }
         }
@@ -199,6 +202,11 @@ export async function readProviderStream(response, provider, onItem) {
       502,
     );
     return { content, usage };
+  } catch (error) {
+    // Keep bounded model output for a repair prompt, including the object
+    // rejected by an incremental validator. Never forward it to the canvas.
+    if (error.status === 422) error.partialContent = content.slice(0, 200000);
+    throw error;
   } finally {
     await reader.cancel().catch(() => {});
     reader.releaseLock();

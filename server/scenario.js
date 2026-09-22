@@ -114,7 +114,7 @@ export function scenarioGraph(input, scenario, computed) {
     node(
       "n0",
       "thesis",
-      input.thesis.slice(0, 490),
+      input.thesis,
       "I numeri forniti descrivono lo scenario da analizzare.",
       computed.focus.why,
       "La conclusione non segue dai dati o dalle condizioni dichiarate.",
@@ -165,15 +165,15 @@ export function scenarioGraph(input, scenario, computed) {
         ? "trading"
         : "general",
       deadline: null,
-      horizon: "Periodo dichiarato nel testo; nessuna scadenza aggiunta",
-      context:
-        "Calcolo condizionale sui dati forniti, non dati di mercato verificati.",
+      horizon: "",
+      context: input.context || "",
       missing: [],
     },
     nodes,
     edges: nodes.slice(1).map((n) => ({
       from: "n0",
       to: n.id,
+      relation: n.kind === "alternative" ? "challenges" : "supports",
       mechanism:
         n.kind === "alternative"
           ? "Questa condizione cambia la validità della conclusione dello scenario."

@@ -38,7 +38,9 @@ test("wireSchema clones the schema and derives parent-indexed nodes", () => {
   assert.equal(schema.properties.edges, undefined);
   assert.equal(schema.required.includes("edges"), false);
   assert.equal(node.properties.id, undefined);
-  assert.deepEqual(node.properties.parentIndex, { type: ["integer", "null"] });
+  assert.deepEqual(node.properties.parentIndex.type, ["integer", "null"]);
+  assert.equal(node.properties.parentIndex.minimum, 0);
+  assert.match(node.properties.parentIndex.description, /NON profondità/);
   assert.deepEqual(node.properties.mechanism, { type: "string" });
   assert.equal(node.required.includes("id"), false);
   assert.ok(node.required.includes("parentIndex"));
@@ -46,6 +48,22 @@ test("wireSchema clones the schema and derives parent-indexed nodes", () => {
   assert.ok(GRAPH_SCHEMA.properties.edges);
   assert.ok(GRAPH_SCHEMA.properties.nodes.items.properties.id);
   assert.ok(GRAPH_SCHEMA.required.includes("edges"));
+});
+
+test("typed relations survive both compilation and streaming without leaking onto nodes", () => {
+  const raw = wireMap();
+  raw.nodes[0].relation = null;
+  raw.nodes[1].relation = "requires";
+  raw.nodes[2].relation = "challenges";
+  const compiled = compileWire(raw);
+  assert.deepEqual(compiled.edges.map((e) => e.relation), ["requires", "challenges"]);
+  assert.ok(compiled.nodes.every((n) => !Object.hasOwn(n, "relation")));
+  const events = [];
+  const emit = wireProgress((type, data) => events.push({ type, data }));
+  raw.nodes.forEach((n) => emit("node", n));
+  assert.deepEqual(events.filter((e) => e.type === "edge").map((e) => e.data), compiled.edges);
+  raw.nodes[1].relation = "invented";
+  assert.throws(() => compileWire(raw), /Relazione/);
 });
 
 test("compileWire assigns canonical IDs and derives only declared parent edges", () => {

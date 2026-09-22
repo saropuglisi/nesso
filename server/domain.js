@@ -2,11 +2,12 @@ import { createHash } from "node:crypto";
 import { calculate } from "./arithmetic.js";
 
 export const EFFORT = Object.freeze({
-  low: { label: "Basso", depth: 2, nodes: 6, tokens: 5000 },
-  medium: { label: "Medio", depth: 3, nodes: 10, tokens: 8000 },
-  high: { label: "Alto", depth: 4, nodes: 16, tokens: 12000 },
-  max: { label: "Massimo", depth: 5, nodes: 24, tokens: 18000 },
+  low: { label: "Basso", depth: 2, minNodes: 3, nodes: 6, tokens: 5000 },
+  medium: { label: "Medio", depth: 3, minNodes: 3, nodes: 10, tokens: 8000 },
+  high: { label: "Alto", depth: 4, minNodes: 3, nodes: 16, tokens: 12000 },
+  max: { label: "Massimo", depth: 5, minNodes: 3, nodes: 24, tokens: 18000 },
 });
+export const RELATIONS = Object.freeze(["causes", "requires", "supports", "challenges", "measures"]);
 export class AppError extends Error {
   constructor(message, status = 400) {
     super(message);
@@ -45,13 +46,18 @@ export function inputSpec(raw) {
     raw.domain === undefined || ["general", "trading"].includes(raw.domain),
     "Ambito non valido.",
   );
+  requireThat(
+    typeof raw.context !== "string" || raw.context.length <= 12000,
+    "Il contesto supera 12000 caratteri. Riducilo esplicitamente: non viene tagliato automaticamente.",
+  );
   return {
     thesis,
+    research: raw.research === true,
     effort: raw.effort,
     domain: raw.domain ?? null,
     deadline: raw.deadline ? date(raw.deadline, "Scadenza") : null,
     referenceDate: new Date().toISOString().slice(0, 10),
-    context: typeof raw.context === "string" ? raw.context.slice(0, 12000) : "",
+    context: typeof raw.context === "string" ? raw.context : "",
   };
 }
 const str = { type: "string" };
@@ -179,7 +185,7 @@ export function validateGraph(g, effort) {
   const financial = validateFinancial(g.financial);
   requireThat(
     Array.isArray(g.nodes) &&
-      g.nodes.length >= 3 &&
+      g.nodes.length >= EFFORT[effort].minNodes &&
       g.nodes.length <= EFFORT[effort].nodes,
     "Numero di nodi fuori dal budget selezionato.",
     422,
@@ -213,7 +219,7 @@ export function validateGraph(g, effort) {
       422,
     );
     ids.add(n.id);
-    text(n.label, "Nodo", 500);
+    text(n.label, "Nodo", n.kind === "thesis" ? 6000 : 500);
     requireThat(
       ["thesis", "consequence", "alternative"].includes(n.kind),
       "Tipo nodo non valido.",
@@ -221,6 +227,9 @@ export function validateGraph(g, effort) {
     );
     checkStrings(n.assumptions, "Assunzioni");
     checkStrings(n.evidenceNeeded, "Evidenze richieste");
+    if (n.sourceIds !== undefined) {
+      requireThat(Array.isArray(n.sourceIds) && n.sourceIds.length <= 6 && n.sourceIds.every((id) => typeof id === "string" && /^R[1-6]$/.test(id)), "Riferimenti alle fonti non validi.", 422);
+    }
     text(n.challenge, "Domanda critica", 2000);
     text(n.falsifier, "Invalidazione", 2000);
   }
@@ -247,6 +256,7 @@ export function validateGraph(g, effort) {
     requireThat(!seenEdges.has(key), "Arco duplicato.", 422);
     seenEdges.add(key);
     text(e.mechanism, "Meccanismo", 2000);
+    requireThat(e.relation === undefined || RELATIONS.includes(e.relation), "Relazione non valida.", 422);
   }
   const visiting = new Set();
   function visit(id) {
@@ -327,11 +337,13 @@ export function validateGraph(g, effort) {
       evidenceNeeded: n.evidenceNeeded,
       depth: levels.get(n.id),
       evidenceStatus: "unverified",
+      ...(n.sourceIds ? { sourceIds: [...new Set(n.sourceIds)] } : {}),
     })),
     edges: g.edges.map((e) => ({
       from: e.from,
       to: e.to,
       mechanism: e.mechanism,
+      ...(e.relation ? { relation: e.relation } : {}),
     })),
     uncertainties: g.uncertainties,
     trading: g.trading,

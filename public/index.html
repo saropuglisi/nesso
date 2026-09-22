@@ -25,12 +25,14 @@
     <nav id="menu" hidden>
       <button id="newButton">＋ Nuova tesi</button
       ><button id="mapButton">Mappa</button
-      ><button id="journalButton">Thinking Journal</button>
+      ><button id="journalButton">Le mie tesi</button>
     </nav>
     <div class="toolbar">
       <span id="titleLabel">Il tuo laboratorio di pensiero</span
       ><span id="effortLabel"></span
+      ><button id="chartsButton" aria-pressed="false" disabled>Analisi e grafici</button
       ><button id="reviseButton" disabled>Rivedi tesi</button
+      ><button id="sourcesButton">Fonti e dati</button
       ><button id="saveButton" disabled>Fissa criteri</button>
     </div>
     <main id="workspace">
@@ -40,6 +42,10 @@
         ><button id="retryAnalysis" hidden>Riprova</button>
       </div>
       <div id="canvas">
+        <div id="originalThesis" hidden>
+          <span class="eyebrow">TESI ORIGINALE</span>
+          <strong id="originalThesisText"></strong>
+        </div>
         <button id="focusSummary" hidden aria-controls="inspector">
           <span class="eyebrow">IL PASSAGGIO DECISIVO · DA VERIFICARE</span
           ><span id="focusClaim"></span
@@ -48,14 +54,29 @@
         <div id="graph"></div>
         <div id="empty">
           <span class="eyebrow">DAL PENSIERO AI NESSI</span>
-          <h1>Che cosa vuoi mettere alla prova?</h1>
-          <p>
-            Una tesi sui mercati, una decisione, un’idea.<br />Parti da una
-            previsione e scopri che cosa deve essere vero.
-          </p>
-          <button class="primary" id="emptyNew">Scrivi una tesi →</button>
+          <h1>Metti alla prova la tua tesi</h1>
+          <p>Scrivi una previsione o un’idea, poi scegli come esplorarne i nessi.</p>
+          <div class="landing-composer">
+            <label class="sr-only" for="landingThesis">La tua tesi</label>
+            <textarea id="landingThesis" maxlength="6000" placeholder="Scrivi qui la tua tesi…"></textarea>
+            <div class="landing-controls">
+              <label for="landingEffort">Effort</label>
+              <select id="landingEffort" aria-label="Profondità dell’analisi">
+                <option value="low">Basso</option>
+                <option value="medium" selected>Medio</option>
+                <option value="high">Alto</option>
+                <option value="max">Massimo</option>
+              </select>
+              <button class="primary" id="landingAnalyze">Esplora →</button>
+            </div>
+            <div class="error" id="landingError" role="alert"></div>
+            <label class="research-toggle"><input id="landingResearch" type="checkbox" checked> Consulta API pubbliche quando servono dati</label>
+            <small class="muted">SEC / EDGAR · FRED · World Bank. Nessuna ricerca web generica.</small>
+          </div>
+          <section id="landingCritique" class="critique-panel" hidden aria-live="polite"></section>
         </div>
       </div>
+      <section id="analysisPanel" hidden aria-live="polite"></section>
       <aside id="inspector" hidden></aside>
     </main>
     <section id="journal" hidden></section>

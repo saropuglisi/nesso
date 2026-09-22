@@ -3,6 +3,16 @@ import { readProviderStream } from "./stream.js";
 import { FINANCIAL_METHOD } from "./financial-prompt.js";
 
 export const PROMPT_VERSION = "nesso-analysis-v4-financial";
+function isPrivateLanHost(hostname) {
+  const parts = hostname.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255))
+    return false;
+  return (
+    parts[0] === 10 ||
+    (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+    (parts[0] === 192 && parts[1] === 168)
+  );
+}
 export function config(env = process.env) {
   const provider = env.NESSO_PROVIDER || "ollama";
   requireThat(
@@ -18,14 +28,16 @@ export function config(env = process.env) {
         : "http://127.0.0.1:1234/v1")
   ).replace(/\/$/, "");
   const u = new URL(base),
-    local = ["127.0.0.1", "localhost", "[::1]"].includes(u.hostname);
+    local = ["127.0.0.1", "localhost", "[::1]"].includes(u.hostname),
+    privateLan = isPrivateLanHost(u.hostname),
+    trustedHttp = local || (privateLan && env.NESSO_ALLOW_PRIVATE_HTTP === "true");
   requireThat(
     !u.username &&
       !u.password &&
       !u.search &&
       !u.hash &&
-      (u.protocol === "https:" || (u.protocol === "http:" && local)),
-    "Il provider deve usare HTTPS oppure HTTP su loopback.",
+      (u.protocol === "https:" || (u.protocol === "http:" && trustedHttp)),
+    "Il provider deve usare HTTPS, HTTP su loopback o una LAN privata autorizzata.",
   );
   requireThat(
     provider !== "ollama" || local,
@@ -40,6 +52,7 @@ export function config(env = process.env) {
     provider,
     base,
     local,
+    privateLan,
     model: env.NESSO_MODEL || "",
     key: env.NESSO_API_KEY || "",
     timeout,
@@ -52,7 +65,7 @@ export function publicConfig(c) {
     local: c.local,
     endpoint: c.base,
     keyConfigured: Boolean(c.key),
-    ready: Boolean(c.model && (c.local || c.key)),
+    ready: Boolean(c.model && (c.local || c.privateLan || c.key)),
     timeoutMs: c.timeout,
     effort: EFFORT,
   };
@@ -135,12 +148,24 @@ export async function infer(
     503,
   );
   requireThat(
-    c.local || c.key,
+    c.local || c.privateLan || c.key,
     "Configura NESSO_API_KEY sul server prima di usare un’API remota.",
     503,
   );
   const req = requestFor(c, input, options),
     started = Date.now();
+  const provenance = (usage) => ({
+    provider: c.provider,
+    model: c.model,
+    endpoint: c.base,
+    local: c.local,
+    promptVersion: PROMPT_VERSION,
+    promptHash: hash(options.messages || messages(input)),
+    schemaHash: hash(options.schema || GRAPH_SCHEMA),
+    generatedAt: new Date().toISOString(),
+    durationMs: Date.now() - started,
+    usage,
+  });
   if (onProgress) req.body.stream = true;
   let res;
   try {
@@ -174,7 +199,18 @@ export async function infer(
   }
   let raw;
   if (onProgress) {
-    const streamed = await readProviderStream(res, c.provider, onProgress);
+    let streamed;
+    try {
+      streamed = await readProviderStream(res, c.provider, onProgress);
+    } catch (error) {
+      if (error.status === 422)
+        error.extraction = {
+          partialContent: error.partialContent,
+          // An interrupted stream may not have delivered final token usage.
+          provenance: { ...provenance(null), status: "invalid" },
+        };
+      throw error;
+    }
     raw =
       c.provider === "ollama"
         ? {
@@ -248,31 +284,26 @@ export async function infer(
   try {
     graph = JSON.parse(content);
   } catch {
-    throw new AppError(
+    const error = new AppError(
       "Il modello ha restituito JSON non valido. Cambia modello o riduci effort.",
       422,
     );
+    error.extraction = {
+      partialContent: content,
+      provenance: { ...provenance(raw.usage || null), status: "invalid" },
+    };
+    throw error;
   }
   return {
     graph,
-    provenance: {
-      provider: c.provider,
-      model: c.model,
-      endpoint: c.base,
-      local: c.local,
-      promptVersion: PROMPT_VERSION,
-      promptHash: hash(options.messages || messages(input)),
-      schemaHash: hash(options.schema || GRAPH_SCHEMA),
-      generatedAt: new Date().toISOString(),
-      durationMs: Date.now() - started,
-      usage:
-        raw.usage ||
+    provenance: provenance(
+      raw.usage ||
         (c.provider === "ollama"
           ? {
               inputTokens: raw.prompt_eval_count ?? null,
               outputTokens: raw.eval_count ?? null,
             }
           : null),
-    },
+    ),
   };
 }

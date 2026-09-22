@@ -11,6 +11,40 @@ import { openStore } from "../server/store.js";
 import { config } from "../server/provider.js";
 import { graph, input, criterion } from "./fixtures.js";
 
+test("research is opt-in server-side, cannot be forged by client, and persists with citations", async (t) => {
+  const store = openStore(":memory:");
+  const evidence = { status: "collected", sources: [{ id: "R1", provider: "worldbank", kind: "data", title: "Observation", url: "https://api.worldbank.org/", data: { value: 3.25 } }], attempts: [], warnings: [] };
+  let researches = 0;
+  const app = createApp({ store, provider: config({ NESSO_MODEL: "test" }), sourcesConfig: { secUserAgent: "private@test.example", fredKey: "f".repeat(32) },
+    researcher: async () => { researches++; return evidence; },
+    inference: async (_provider, received) => {
+      assert.equal(Boolean(received.evidence), received.research);
+      if (received.research) assert.deepEqual(received.evidence, evidence);
+      const g = graph();
+      if (received.research) g.nodes[1].sourceIds = ["R1"];
+      return { graph: g, provenance: {} };
+    },
+  });
+  app.server.listen(0, "127.0.0.1"); await once(app.server, "listening");
+  t.after(() => { app.server.closeAllConnections(); app.server.close(); store.close(); });
+  const base = `http://127.0.0.1:${app.server.address().port}`;
+  const publicInfo = await (await fetch(base + "/api/config")).text();
+  assert.ok(!publicInfo.includes("private@test.example"));
+  assert.ok(!publicInfo.includes("f".repeat(32)));
+  for (const enabled of [false, true]) {
+    const response = await fetch(base + "/api/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...input, research: enabled, evidence: { forged: true } }) });
+    assert.equal(response.status, 201);
+    const record = await response.json();
+    assert.equal(Boolean(record.body.research), enabled);
+    if (enabled) {
+      assert.deepEqual(record.body.research, evidence);
+      assert.deepEqual(record.body.graph.nodes[1].sourceIds, ["R1"]);
+      assert.deepEqual(store.get(record.id).body.research, evidence);
+    }
+  }
+  assert.equal(researches, 1);
+});
+
 test("full HTTP workflow persists genuine provider output, freezes criteria, rejects cross-origin", async (t) => {
   const store = openStore(":memory:"),
     provider = config({ NESSO_MODEL: "test" });
@@ -91,6 +125,8 @@ test("full HTTP workflow persists genuine provider output, freezes criteria, rej
   assert.equal(v.status, 201);
   assert.equal((await v.json()).body.score, null);
   const journal = await (await fetch(base + "/api/journal")).json();
+  assert.equal(journal.analyses.length, 1);
+  assert.equal(journal.analyses[0].id, analysis.id);
   assert.equal(journal.snapshots.length, 1);
   assert.equal(journal.evaluations.length, 1);
   assert.equal(
@@ -143,6 +179,38 @@ test("invalid model output never enters storage", async (t) => {
   assert.ok(r.status >= 400);
   assert.equal(store.list("analysis").length, 0);
 });
+test("dialogue preserves thesis/context, does not save a provisional map, and releases busy on failure", async (t) => {
+  const store = openStore(":memory:");
+  let fail = true;
+  const response = { observation: "Osservazione", question: "Quale esito?", options: ["Uno", "Due"] };
+  const app = createApp({
+    store,
+    provider: config({ NESSO_MODEL: "fixture" }),
+    dialogue: async (_, received) => {
+      assert.equal(received.thesis, input.thesis);
+      assert.equal(received.context, "Risposta dell’utente");
+      if (fail) throw new Error("provider offline");
+      return response;
+    },
+  });
+  app.server.listen(0, "127.0.0.1");
+  await once(app.server, "listening");
+  t.after(() => { app.server.closeAllConnections(); app.server.close(); store.close(); });
+  const endpoint = `http://127.0.0.1:${app.server.address().port}/api/critique`;
+  const post = (body, headers = {}) => fetch(endpoint, {
+    method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body),
+  });
+  const body = { ...input, context: "Risposta dell’utente" };
+  assert.equal((await post(body)).status, 500);
+  fail = false;
+  const result = await post(body);
+  assert.equal(result.status, 200);
+  assert.deepEqual(await result.json(), response);
+  assert.equal(store.list("analysis").length, 0);
+  assert.equal((await post({ ...body, thesis: "x" })).status, 400);
+  assert.equal((await post(body, { origin: "https://attacker.example" })).status, 403);
+});
+
 test("SQLite persists across restart and rejects updates and deletes", () => {
   const dir = mkdtempSync(join(tmpdir(), "nesso-test-")),
     file = join(dir, "journal.sqlite");
